@@ -16,10 +16,10 @@
 
 ## 🧮 **Présentation du projet**
 
-**MicroCoaster™** est un bot Discord développé pour gérer et automatiser les services d'une entreprise de vente de microcoasters imprimés en 3D. Le bot facilite l'activation des garanties produits avec statut premium, le support client et la modération du serveur Discord.
+**MicroCoaster™** est un bot Discord développé pour gérer et automatiser les services d'une entreprise de vente de sous-verres (coasters) personnalisés. Le bot facilite l'activation des garanties produits avec statut premium, le support client et la modération du serveur Discord.
 
 ### **Contexte**
-- **Entreprise** : MicroCoaster™ (vente de microcoasters imprimés en 3D)
+- **Entreprise** : MicroCoaster™ (vente de sous-verres personnalisés)
 - **Plateforme** : Discord
 - **Technologies** : Node.js, Discord.js v14, MYSQL
 - **Public cible** : Clients de l'entreprise, staff, modérateurs
@@ -48,7 +48,7 @@
 ### **Technologies utilisées**
 - **Runtime** : Node.js (version 18+)
 - **Framework Discord** : Discord.js v14
-- **Base de données** : MYSQL
+- **Base de données** : SQLite (développement) / PostgreSQL (production)
 - **Authentification** : Tokens Discord Bot
 - **Hébergement** : Hébergement personnel
 
@@ -80,7 +80,7 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
 
 #### **Spécifications techniques**
 - **Commande setup** : `/setup-warranty` (admin uniquement)
-- **Commande garantie** : `/activate-warranty <code>` (admin uniquement)
+- **Commande garantie** : `/activate-warranty <user>` (admin uniquement)
 - **Interface utilisateur** : Embed avec bouton d'interaction
 - **Modal** : Champ de saisie pour le code
 - **Système de rappels** : Tâches programmées (cron jobs)
@@ -117,10 +117,10 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
 
 ##### **Étape 2 : Activation de la garantie par l'admin**
 
-1. **Commande admin** : `/activate-warranty <code>`
-   - Vérification que le code existe et est lié à un utilisateur
+1. **Commande admin** : `/activate-warranty <user>`
+   - Vérification que l'utilisateur a un code lié
    - Activation de la garantie dans la base de données
-   - Attribution du rôle `🛡️ Garantie Active` à l'utilisateur possédant ce code
+   - Attribution du rôle `🛡️ Garantie Active` à l'utilisateur
    - Démarrage du décompte de garantie (1 an)
    - Programmation des rappels automatiques
 
@@ -131,7 +131,7 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
      - Enregistrement de la date d'activation de garantie
      - Programmation des rappels automatiques
    - **Échec** :
-     - Message d'erreur si le code n'existe pas ou n'est pas lié (en anglais)
+     - Message d'erreur si l'utilisateur n'a pas de code lié (en anglais)
      - Message d'erreur si la garantie est déjà active (en anglais)
 
 #### **Système de rappels automatiques**
@@ -148,7 +148,7 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
 - **Log** : Enregistrement de la re-attribution automatique
 
 #### **Fonctionnalités staff**
-- Commande `/activate-warranty <code>` : Activer la garantie pour un code spécifique
+- Commande `/activate-warranty <user>` : Activer la garantie pour un utilisateur
 - Commande `/warranty-check <user>` : Vérifier le statut complet (code + garantie)
 - Commande `/warranty-extend <user> <days>` : Prolonger la garantie
 - Commande `/force-restore-roles <user>` : Re-attribuer manuellement les rôles
@@ -179,7 +179,7 @@ Fournir un système de support client structuré et efficace avec gestion automa
 
 #### **Types de tickets disponibles**
 
-1. **🛠️ Problème avec un microcoaster**
+1. **🛠️ Problème avec un coaster**
    - Salon privé avec le client et l'équipe technique
    - Template de questions automatiques (en anglais)
    - Possibilité d'upload d'images
@@ -190,16 +190,15 @@ Fournir un système de support client structuré et efficace avec gestion automa
    - FAQ automatique (en anglais)
 
 3. **📨 Candidature staff**
-   - Création automatique d'un salon privé
-   - Ping automatique de l'équipe de recrutement
-   - Message automatique informant qu'un membre de l'équipe a été contacté
+   - Processus de candidature structuré
+   - Formulaire automatique via modale (en anglais)
+   - Notification des responsables RH
 
 #### **Fonctionnement détaillé**
 
 1. **Création de ticket**
    - Clic sur bouton → Création immédiate du salon privé
-   - Format : `ticket-[numéro]` (numérotation automatique)
-   - Organisation par catégories selon le type de ticket
+   - Format : `ticket-[type]-[username]-[timestamp]`
    - Permissions automatiques : client + staff concerné
    - Message d'accueil personnalisé selon le type
 
@@ -219,9 +218,9 @@ Fournir un système de support client structuré et efficace avec gestion automa
 
 #### **Fonctionnalités avancées**
 - **Auto-assignation** : Selon la charge de travail du staff
+- **Escalade automatique** : Si pas de réponse sous 24h
 - **Statistiques** : Temps de réponse moyen, satisfaction client
 - **Templates** : Réponses prédéfinies pour les cas courants
-- **Organisation par catégories** : Tickets triés automatiquement par type
 
 ---
 
@@ -472,5 +471,5 @@ npm start
 
 ---
 
-*Document créé le 4 juillet 2025 - Version 2.1*  
+*Document créé le 4 juillet 2025 - Version 2.0*  
 *Auteur : Yamakajump™*

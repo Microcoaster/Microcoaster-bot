@@ -80,7 +80,7 @@ Allow customers to activate their premium codes and administrators to manage pro
 
 #### **Technical Specifications**
 - **Setup command** : `/setup-warranty` (admin only)
-- **Warranty command** : `/activate-warranty <user>` (admin only)
+- **Warranty command** : `/activate-warranty <code>` (admin only)
 - **User interface** : Embed with interaction button
 - **Modal** : Code input field
 - **Reminder system** : Scheduled tasks (cron jobs)
@@ -117,10 +117,10 @@ Allow customers to activate their premium codes and administrators to manage pro
 
 ##### **Step 2: Warranty Activation by Admin**
 
-1. **Admin Command** : `/activate-warranty <user>`
-   - Verify user has linked code
+1. **Admin Command** : `/activate-warranty <code>`
+   - Verify code exists and is linked to a user
    - Activate warranty in database
-   - Assign `🛡️ Garantie Active` role to user
+   - Assign `🛡️ Garantie Active` role to user owning this code
    - Start warranty countdown (1 year)
    - Schedule automatic reminders
 
@@ -131,7 +131,7 @@ Allow customers to activate their premium codes and administrators to manage pro
      - Record warranty activation date
      - Schedule automatic reminders
    - **Failure**:
-     - Error message if user has no linked code (in English)
+     - Error message if code doesn't exist or isn't linked (in English)
      - Error message if warranty already active (in English)
 
 #### **Automatic Reminder System**
@@ -148,7 +148,7 @@ Allow customers to activate their premium codes and administrators to manage pro
 - **Log** : Record automatic re-assignment
 
 #### **Staff Features**
-- Command `/activate-warranty <user>` : Activate warranty for a user
+- Command `/activate-warranty <code>` : Activate warranty for a specific code
 - Command `/warranty-check <user>` : Check complete status (code + warranty)
 - Command `/warranty-extend <user> <days>` : Extend warranty
 - Command `/force-restore-roles <user>` : Manually re-assign roles
@@ -190,15 +190,16 @@ Provide a structured and efficient customer support system with automated ticket
    - Automatic FAQ (in English)
 
 3. **📨 Staff Application**
-   - Structured application process
-   - Automatic form via modal (in English)
-   - HR manager notification
+   - Automatic creation of private channel
+   - Automatic ping of recruitment team
+   - Automatic message informing that a team member has been contacted
 
 #### **Detailed Operation**
 
 1. **Ticket Creation**
    - Button click → Immediate private channel creation
-   - Format: `ticket-[type]-[username]-[timestamp]`
+   - Format: `ticket-[number]` (automatic numbering)
+   - Organization by categories according to ticket type
    - Automatic permissions: customer + relevant staff
    - Personalized welcome message according to type
 
@@ -218,9 +219,9 @@ Provide a structured and efficient customer support system with automated ticket
 
 #### **Advanced Features**
 - **Auto-assignment** : Based on staff workload
-- **Automatic escalation** : If no response within 24h
 - **Statistics** : Average response time, customer satisfaction
 - **Templates** : Predefined responses for common cases
+- **Category organization** : Tickets automatically sorted by type
 
 ---
 
@@ -471,5 +472,5 @@ npm start
 
 ---
 
-*Document created on July 4, 2025 - Version 2.0*  
+*Document created on July 4, 2025 - Version 2.1*  
 *Author : Yamakajump™*
