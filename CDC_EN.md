@@ -16,10 +16,10 @@
 
 ## 🧮 **Project Overview**
 
-**MicroCoaster™** is a Discord bot developed to manage and automate services for a custom coaster selling business. The bot facilitates product warranty activation with premium status, customer support, and Discord server moderation.
+**MicroCoaster™** is a Discord bot developed to manage and automate services for a 3D printed microcoaster selling business. The bot facilitates product warranty activation with premium status, customer support, and Discord server moderation.
 
 ### **Context**
-- **Company** : MicroCoaster™ (custom coaster sales)
+- **Company** : MicroCoaster™ (3D printed microcoaster sales)
 - **Platform** : Discord
 - **Technologies** : Node.js, Discord.js v14, MYSQL
 - **Target Audience** : Company customers, staff, moderators
@@ -179,7 +179,7 @@ Provide a structured and efficient customer support system with automated ticket
 
 #### **Available Ticket Types**
 
-1. **🛠️ Coaster Problem**
+1. **🛠️ Microcoaster Problem**
    - Private channel with customer and technical team
    - Automatic question templates (in English)
    - Image upload capability
