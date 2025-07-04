@@ -6,25 +6,24 @@
 
 1. [Présentation du projet](#-présentation-du-projet)
 2. [Objectifs](#-objectifs)
-## ⚙### ❓ **Système de support par tickets** **Fonctionnalités détaillées**
-
-### ❓ **Système de support par tickets**[Architecture technique](#-architecture-te### ❓ **Système de support par tickets**nnalités détaillées](#-fonctionnalités-détaillées)
+3. [Architecture technique](#️-architecture-technique)
+4. [Fonctionnalités détaillées](#️-fonctionnalités-détaillées)
 5. [Base de données](#-base-de-données)
 6. [Configuration et permissions](#-configuration-et-permissions)
-7. [Sécurité et modération](#-sécurité-et-modération)
-8. [Planning de développement](#-planning-de-développement)
+7. [Notes techniques](#-notes-techniques)
 
 ---
 
-## � **Présentation du projet**
+## 🧮 **Présentation du projet**
 
 **MicroCoaster™** est un bot Discord développé pour gérer et automatiser les services d'une entreprise de vente de sous-verres (coasters) personnalisés. Le bot facilite l'activation des garanties produits avec statut premium, le support client et la modération du serveur Discord.
 
 ### **Contexte**
 - **Entreprise** : MicroCoaster™ (vente de sous-verres personnalisés)
 - **Plateforme** : Discord
-- **Technologies** : Node.js, Discord.js v14, SQLite/PostgreSQL
+- **Technologies** : Node.js, Discord.js v14, MYSQL
 - **Public cible** : Clients de l'entreprise, staff, modérateurs
+- **⚠️ Langue importante** : Le code source est en français, mais **toutes les interfaces utilisateur (boutons, messages, embeds) doivent être en anglais** car le serveur Discord cible une audience anglophone
 
 ---
 
@@ -49,7 +48,7 @@
 ### **Technologies utilisées**
 - **Runtime** : Node.js (version 18+)
 - **Framework Discord** : Discord.js v14
-- **Base de données** : SQLite (développement) / PostgreSQL (production)
+- **Base de données** : MYSQL
 - **Authentification** : Tokens Discord Bot
 - **Hébergement** : Hébergement personnel
 
@@ -92,14 +91,14 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
 ##### **Étape 1 : Activation du code par l'utilisateur**
 
 1. **Affichage initial**
-   - Embed avec titre : "📦 Activation de code Premium"
-   - Description explicative du processus
-   - Bouton : `📋 Activer mon code`
+   - Embed avec titre : "📦 Premium Code Activation"
+   - Description explicative du processus (en anglais)
+   - Bouton : `📋 Activate my code`
 
 2. **Processus d'activation utilisateur**
    - Clic sur bouton → Ouverture d'une modale Discord
    - Champ requis :
-     - Code premium/garantie (identifiant unique)
+     - Code premium/garantie (identifiant unique) - Libellé en anglais
    - Validation automatique côté serveur :
      - Code existe en base de données
      - Code non utilisé
@@ -108,13 +107,13 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
    - **Succès** :
      - Attribution automatique du rôle `🎖️ Premium`
      - Liaison du code à l'utilisateur en BDD
-     - Message de confirmation avec statut du code
+     - Message de confirmation avec statut du code (en anglais)
      - **IMPORTANT** : Si la garantie est déjà activée par un admin → Attribution aussi du rôle `🛡️ Garantie Active`
      - Log de l'action
    - **Échec** :
-     - Message d'erreur spécifique
+     - Message d'erreur spécifique (en anglais)
      - Limitation des tentatives (3 max par utilisateur/heure)
-     - Guidance vers le support si nécessaire
+     - Guidance vers le support si nécessaire (en anglais)
 
 ##### **Étape 2 : Activation de la garantie par l'admin**
 
@@ -128,16 +127,16 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
 2. **Résultats**
    - **Succès** :
      - L'utilisateur reçoit le rôle `🛡️ Garantie Active`
-     - Message de confirmation à l'utilisateur et à l'admin
+     - Message de confirmation à l'utilisateur et à l'admin (en anglais)
      - Enregistrement de la date d'activation de garantie
      - Programmation des rappels automatiques
    - **Échec** :
-     - Message d'erreur si l'utilisateur n'a pas de code lié
-     - Message d'erreur si la garantie est déjà active
+     - Message d'erreur si l'utilisateur n'a pas de code lié (en anglais)
+     - Message d'erreur si la garantie est déjà active (en anglais)
 
 #### **Système de rappels automatiques**
-- **11 mois après activation garantie** : Premier rappel (MP)
-- **1 semaine avant expiration** : Rappel final (MP + ping optionnel)
+- **11 mois après activation garantie** : Premier rappel (MP en anglais)
+- **1 semaine avant expiration** : Rappel final (MP + ping optionnel en anglais)
 - **Expiration** : Retrait automatique du rôle `🛡️ Garantie Active` (Premium reste)
 
 #### **Système de re-attribution automatique des rôles**
@@ -145,7 +144,7 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
 - **Vérification** : Contrôle en base de données
   - Si code lié → re-attribution du rôle `🎖️ Premium`
   - Si garantie active → re-attribution aussi du rôle `🛡️ Garantie Active`
-- **Notification** : Message de bienvenue personnalisé mentionnant la restauration des rôles
+- **Notification** : Message de bienvenue personnalisé mentionnant la restauration des rôles (en anglais)
 - **Log** : Enregistrement de la re-attribution automatique
 
 #### **Fonctionnalités staff**
@@ -162,78 +161,6 @@ Permettre aux clients d'activer leur code premium et aux administrateurs de gér
 - Logs complets des actions
 - Vérification de la validité lors des re-attributions
 - Séparation des permissions : utilisateurs peuvent lier, seuls admins activent garanties
-
----
-├── buttons/              # Gestionnaires de boutons
-├── modals/               # Gestionnaires de modales
-├── events/               # Événements Discord
-├── dao/                  # Accès aux données (Data Access Objects)
-├── utils/                # Utilitaires et helpers
-└── sql/                  # Scripts de base de données
-```
-
----
-
-## ⚙️ **Fonctionnalités détaillées**
-
-### `#🎫・redeem-voucher` : Salon d’activation de code Premium
-
-* **Objectif** : Permet aux utilisateurs de **rentrer un code fourni avec leur achat** pour débloquer un rôle spécial (ex : Premium).
-* **Interface** :
-
-  * Embed avec un titre, une description, et un bouton `🎟️ Rentrer un code`.
-* **Fonctionnement** :
-
-  * Lorsqu’un utilisateur clique sur le bouton, une **fenêtre modale Discord** s’ouvre pour entrer le code.
-  * Si le code est valide :
-
-    * L’utilisateur reçoit automatiquement le rôle `🎖️ Premium`.
-    * Un message de confirmation est envoyé en message privé.
-  * Si le code est invalide :
-
-    * Un message d’erreur s’affiche (avec une limite de tentatives pour éviter les abus).
-  * Les codes sont **à usage unique** et gérés via une base de données interne.
-
----
-
-### `#📦・warranty-activation` : Salon d’activation de garantie
-
-* **Objectif** : Permet aux clients d’**activer une garantie produit de 1 an**.
-* **Interface** :
-
-  * Embed explicatif avec un bouton `📋 Activer la garantie`.
-* **Fonctionnement** :
-
-  * En cliquant sur le bouton, une **modale Discord** s’ouvre pour entrer le code de garantie.
-  * Si le code est valide :
-
-    * L’utilisateur reçoit le rôle `🛡️ Garantie Active`.
-    * Le bot enregistre la **date d’activation** dans une base de données.
-    * Un **rappel automatique** est prévu 1 mois avant la fin de la garantie (via message privé ou ticket).
-  * Les codes invalides déclenchent un message d’erreur.
-
----
-
-### `#❓・support` : Salon de gestion de tickets
-
-* **Objectif** : Mettre en place un système de **support basé sur des tickets**, pour :
-
-  * Les problèmes techniques liés aux coasters
-  * Les soucis liés au serveur Discord
-  * Les candidatures pour rejoindre l’équipe
-* **Interface** :
-
-  * Embed avec 3 boutons :
-
-    * `🛠️ Problème avec un coaster`
-    * `🎮 Problème Discord`
-    * `📨 Candidature staff`
-* **Fonctionnement** :
-
-  * En cliquant sur un bouton, un **salon privé de support** est créé.
-  * Un message d’introduction guide l’utilisateur selon le type de ticket.
-  * Le staff peut répondre, puis clôturer le ticket via un bouton `🔒 Fermer`.
-  * Optionnellement, les tickets peuvent être **sauvegardés sous forme de fichier `.txt`**.
 
 ---
 
@@ -254,17 +181,17 @@ Fournir un système de support client structuré et efficace avec gestion automa
 
 1. **🛠️ Problème avec un coaster**
    - Salon privé avec le client et l'équipe technique
-   - Template de questions automatiques
+   - Template de questions automatiques (en anglais)
    - Possibilité d'upload d'images
 
 2. **🎮 Problème Discord**
    - Support pour les problèmes liés au serveur
    - Équipe modération automatiquement notifiée
-   - FAQ automatique
+   - FAQ automatique (en anglais)
 
 3. **📨 Candidature staff**
    - Processus de candidature structuré
-   - Formulaire automatique via modale
+   - Formulaire automatique via modale (en anglais)
    - Notification des responsables RH
 
 #### **Fonctionnement détaillé**
@@ -276,17 +203,17 @@ Fournir un système de support client structuré et efficace avec gestion automa
    - Message d'accueil personnalisé selon le type
 
 2. **Gestion du ticket**
-   - Messages automatiques de guidance
+   - Messages automatiques de guidance (en anglais)
    - Boutons d'action staff :
-     - `📌 Marquer comme prioritaire`
-     - `👤 Assigner à un membre`
-     - `📋 Ajouter des notes internes`
-     - `🔒 Fermer le ticket`
+     - `📌 Mark as Priority`
+     - `👤 Assign to Member`
+     - `📋 Add Internal Notes`
+     - `🔒 Close Ticket`
 
 3. **Fermeture de ticket**
    - Confirmation obligatoire
    - Sauvegarde optionnelle en fichier `.txt`
-   - Message de satisfaction client
+   - Message de satisfaction client (en anglais)
    - Suppression du salon après 24h
 
 #### **Fonctionnalités avancées**
@@ -314,7 +241,7 @@ Maintenir un environnement sain, respectueux et sécurisé sur le serveur Discor
 - **Déclencheurs** : Langage légèrement inapproprié, spam mineur
 - **Actions** :
   - Suppression automatique du message
-  - Avertissement en message privé
+  - Avertissement en message privé (en anglais)
   - Log dans le salon de modération
 
 ##### **Niveau 2 - Sanctions temporaires (3-5 points)**
@@ -544,5 +471,5 @@ npm start
 
 ---
 
-*Document créé le 4 juillet 2025 - Version 2.0*
+*Document créé le 4 juillet 2025 - Version 2.0*  
 *Auteur : Yamakajump™*
