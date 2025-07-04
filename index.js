@@ -74,8 +74,8 @@ const { initializeDatabase } = require("./utils/dbInit");
     }
 
     // Préparer l'API REST avec le token du bot
-    const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
-    const clientId = process.env.ID;
+    const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
+    const clientId = process.env.CLIENT_ID;
 
     // Récupérer les commandes actuellement enregistrées sur Discord
     let registeredCommands = [];
@@ -121,7 +121,7 @@ const { initializeDatabase } = require("./utils/dbInit");
     }
 
     // Lancer le bot
-    client.login(process.env.TOKEN);
+    client.login(process.env.DISCORD_TOKEN);
   } catch (err) {
     console.error(
       "⚠️\x1b[38;5;1m  Erreur lors de l'initialisation de la base de données ou du bot:",

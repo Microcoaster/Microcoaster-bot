@@ -54,6 +54,23 @@ module.exports = {
 
     // Gestion des soumissions de modal (formulaire)
     if (interaction.isModalSubmit()) {
+      // Gérer les modals de configuration spécialement
+      if (interaction.customId.startsWith('config_modal_')) {
+        const configModalHandler = require('../modals/configModal');
+        try {
+          console.log(
+            `\x1b[38;5;2mModal de configuration soumis par ${user}: ${interaction.customId}\x1b[0m`,
+          );
+          await configModalHandler.execute(interaction);
+        } catch (error) {
+          console.error(
+            `⚠️\x1b[38;5;1m  Erreur lors du traitement du modal de configuration ${interaction.customId} par ${user}:`,
+            error,
+          );
+        }
+        return;
+      }
+
       // Construit le chemin vers le gestionnaire de modal en se basant sur l'ID personnalisé
       const modalHandlerPath = path.join(
         __dirname,
@@ -84,17 +101,27 @@ module.exports = {
     if (interaction.isButton()) {
       // On divise le customId pour extraire le nom et les paramètres éventuels
       const [buttonName, ...params] = interaction.customId.split(":");
-      const buttonHandlerPath = path.join(
-        __dirname,
-        "../buttons",
-        `${buttonName}.js`,
-      );
+      
+      // Mapping pour les boutons de ticket - tous utilisent le handler unifié
+      const ticketTypes = ['ticket_technical', 'ticket_product', 'ticket_business', 'ticket_recruitment'];
+      
+      let buttonHandlerPath;
+      let handlerName = buttonName;
+      
+      if (ticketTypes.includes(buttonName)) {
+        // Tous les types de tickets utilisent le handler unifié
+        buttonHandlerPath = path.join(__dirname, "../buttons", "ticketHandler.js");
+        handlerName = 'ticketHandler';
+      } else {
+        // Autres boutons utilisent leur propre handler
+        buttonHandlerPath = path.join(__dirname, "../buttons", `${buttonName}.js`);
+      }
 
       if (fs.existsSync(buttonHandlerPath)) {
         const buttonHandler = require(buttonHandlerPath);
         try {
           console.log(
-            `\x1b[38;5;6mBouton cliqué par ${user}: ${buttonName}\x1b[0m`,
+            `\x1b[38;5;6mBouton cliqué par ${user}: ${buttonName} (handler: ${handlerName})\x1b[0m`,
           );
           await buttonHandler.execute(interaction, params);
         } catch (error) {
@@ -105,7 +132,52 @@ module.exports = {
         }
       } else {
         console.error(
-          `⚠️\x1b[38;5;1m  Handler de bouton ${buttonName} non trouvé.`,
+          `⚠️\x1b[38;5;1m  Handler de bouton ${handlerName} non trouvé.`,
+        );
+      }
+    }
+
+    // Gestion des menus déroulants (StringSelectMenu)
+    if (interaction.isStringSelectMenu()) {
+      // On divise le customId pour extraire le nom et les paramètres éventuels
+      const [menuName, ...params] = interaction.customId.split(":");
+      
+      // Gérer les menus de configuration spécialement
+      if (interaction.customId.startsWith('config_')) {
+        const configHandler = require('../buttons/configHandler');
+        try {
+          console.log(
+            `\x1b[38;5;5mMenu de configuration utilisé par ${user}: ${interaction.customId}\x1b[0m`,
+          );
+          await configHandler.execute(interaction, interaction.client);
+        } catch (error) {
+          console.error(
+            `⚠️\x1b[38;5;1m  Erreur lors du traitement du menu de configuration ${interaction.customId} par ${user}:`,
+            error,
+          );
+        }
+        return;
+      }
+      
+      // Gérer les autres menus (tickets, etc.)
+      const menuHandlerPath = path.join(__dirname, "../buttons", `${menuName}.js`);
+      
+      if (fs.existsSync(menuHandlerPath)) {
+        const menuHandler = require(menuHandlerPath);
+        try {
+          console.log(
+            `\x1b[38;5;5mMenu utilisé par ${user}: ${menuName}\x1b[0m`,
+          );
+          await menuHandler.execute(interaction, params);
+        } catch (error) {
+          console.error(
+            `⚠️\x1b[38;5;1m  Erreur lors du traitement du menu ${interaction.customId} par ${user}:`,
+            error,
+          );
+        }
+      } else {
+        console.error(
+          `⚠️\x1b[38;5;1m  Handler de menu ${menuName} non trouvé.`,
         );
       }
     }

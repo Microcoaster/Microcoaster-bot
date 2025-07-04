@@ -2,11 +2,12 @@
   "dependencies": {
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.7",
-    "mysql2": "^3.13.0"
+    "mysql2": "^3.13.0",
+    "node-cron": "^3.0.3"
   },
-  "name": "discord-bot-template",
+  "name": "microcoaster-bot",
   "version": "1.0.0",
-  "description": "Template complet pour bot Discord avec exemples de commandes, événements, boutons, modals et base de données",
+  "description": "Bot Discord MicroCoaster™ - Gestion automatisée des garanties premium, support client et modération pour entreprise de microcoasters imprimés en 3D",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -19,14 +20,14 @@
   "keywords": [
     "discord",
     "bot",
-    "discord.js",
-    "template",
-    "slash-commands",
-    "buttons",
-    "modals",
-    "database"
+    "microcoaster",
+    "warranty",
+    "support",
+    "3d-printing",
+    "premium",
+    "customer-service"
   ],
-  "author": "Template Discord Bot",
+  "author": "Yamakajump™",
   "license": "MIT",
   "repository": {
     "type": "git",
