@@ -131,14 +131,63 @@ module.exports = {
             }
           }
         }
-      } // Mettre à jour le statut des rôles dans la base de données
+      }      // Mettre à jour le statut des rôles dans la base de données
       await warrantyDAO.updateUserRoleStatus({
         user_id: user.id,
         has_premium: true,
         has_warranty: warrantyActive,
         code_linked: true,
         warranty_expires_at: warrantyActive ? linkResult.warrantyExpires : null,
-      }); // Logger l'activation
+      });
+
+      // Logger dans le canal de logs de rôles
+      const roleLogsChannelId = config.channels.role_logs_channel_id;
+      if (roleLogsChannelId) {
+        const logChannel = guild.channels.cache.get(roleLogsChannelId);
+        if (logChannel) {
+          const rolesAssigned = [];
+          if (premiumRoleAdded) rolesAssigned.push("🎖️ Premium");
+          if (warrantyRoleAdded) rolesAssigned.push("🛡️ Warranty");
+
+          if (rolesAssigned.length > 0) {
+            const logEmbed = new EmbedBuilder()
+              .setColor("#00ff00")
+              .setTitle("🎫 Code Activation - Roles Assigned")
+              .setDescription(`Roles automatically assigned during code activation`)
+              .addFields(
+                {
+                  name: "👤 User",
+                  value: `${user.tag} (<@${user.id}>)`,
+                  inline: true,
+                },
+                {
+                  name: "🎫 Code",
+                  value: `\`${warrantyCode}\``,
+                  inline: true,
+                },
+                {
+                  name: "🎭 Roles Assigned",
+                  value: rolesAssigned.join(", "),
+                  inline: true,
+                },
+                {
+                  name: "⚡ Trigger",
+                  value: "User code activation",
+                  inline: false,
+                }
+              )
+              .setTimestamp();
+
+            try {
+              await logChannel.send({ embeds: [logEmbed] });
+            } catch (logError) {
+              console.error(`Error sending role log for ${user.tag}:`, logError);
+            }
+          }
+        }
+      }
+
+      // Logger l'activation
       await warrantyDAO.logWarrantyAction({
         warranty_id: linkResult.codeData.id,
         user_id: user.id,

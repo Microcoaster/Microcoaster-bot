@@ -112,6 +112,7 @@ module.exports = {
             // Donner le rôle Premium
             const config = require("../config/config.json");
             const premiumRoleId = config.roles.premium_role_id;
+            const rolesAssigned = [];
 
             if (premiumRoleId) {
               const premiumRole =
@@ -122,6 +123,7 @@ module.exports = {
                 );
                 if (!member.roles.cache.has(premiumRoleId)) {
                   await member.roles.add(premiumRole);
+                  rolesAssigned.push("🎖️ Premium");
                   statusMessages.push(`✅ Premium role assigned`);
                 }
               }
@@ -151,7 +153,54 @@ module.exports = {
                     );
                     if (!member.roles.cache.has(warrantyRoleId)) {
                       await member.roles.add(warrantyRole);
+                      rolesAssigned.push("🛡️ Warranty");
                       statusMessages.push(`✅ Warranty role assigned`);
+                    }
+                  }
+                }
+
+                // Logger dans le canal de logs de rôles
+                const roleLogsChannelId = config.channels.role_logs_channel_id;
+                if (roleLogsChannelId && rolesAssigned.length > 0) {
+                  const logChannel = interaction.guild.channels.cache.get(roleLogsChannelId);
+                  if (logChannel) {
+                    const logEmbed = new EmbedBuilder()
+                      .setColor("#00ff00")
+                      .setTitle("🔧 Code Creation - Roles Assigned")
+                      .setDescription(`Roles assigned during code creation and assignment`)
+                      .addFields(
+                        {
+                          name: "👤 User",
+                          value: `${assignToUser.tag} (<@${assignToUser.id}>)`,
+                          inline: true,
+                        },
+                        {
+                          name: "🎫 Code",
+                          value: `\`${code}\``,
+                          inline: true,
+                        },
+                        {
+                          name: "🎭 Roles Assigned",
+                          value: rolesAssigned.join(", "),
+                          inline: true,
+                        },
+                        {
+                          name: "👨‍💼 Created By",
+                          value: `<@${adminId}>`,
+                          inline: true,
+                        },
+                        {
+                          name: "⚡ Trigger",
+                          value: "Admin code creation",
+                          inline: false,
+                        }
+                      )
+                      .setTimestamp();
+
+                    try {
+                      await logChannel.send({ embeds: [logEmbed] });
+                    } catch (logError) {
+                      console.error(`Error sending role log for code creation:`, logError);
                     }
                   }
                 }

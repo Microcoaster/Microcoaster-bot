@@ -26,6 +26,11 @@ const configCategories = {
         description: "Role given to users with active warranties",
         type: "role",
       },
+      member_role_id: {
+        name: "Member Role",
+        description: "Default role given to all new members",
+        type: "role",
+      },
       admin_role_id: {
         name: "Admin Role",
         description: "Role for bot administrators",
@@ -70,11 +75,6 @@ const configCategories = {
       logs_moderation_channel_id: {
         name: "Moderation Logs Channel",
         description: "Channel for moderation logs",
-        type: "channel",
-      },
-      bot_stats_channel_id: {
-        name: "Bot Stats Channel",
-        description: "Channel for bot statistics",
         type: "channel",
       },
       role_logs_channel_id: {
@@ -169,13 +169,6 @@ const configCategories = {
     title: "🎫 Ticket Settings",
     description: "Configure ticket system parameters",
     fields: {
-      auto_close_after_hours: {
-        name: "Auto Close After (hours)",
-        description: "Hours before inactive tickets auto-close",
-        type: "number",
-        min: 1,
-        max: 720,
-      },
       max_tickets_per_user: {
         name: "Max Tickets Per User",
         description: "Maximum active tickets per user",
@@ -205,10 +198,22 @@ module.exports = {
     }
 
     try {
-      await interaction.deferUpdate();
-
       const configPath = path.join(__dirname, "../config/config.json");
       const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+
+      // Check if we need to show a modal (don't defer in that case)
+      let needsModal = false;
+      if (interaction.customId === "config_field_menu") {
+        const selectedValue = interaction.values[0];
+        if (selectedValue !== "back_to_main") {
+          needsModal = true;
+        }
+      }
+
+      // Only defer if we're not showing a modal
+      if (!needsModal) {
+        await interaction.deferUpdate();
+      }
 
       if (interaction.customId === "config_main_menu") {
         // Menu principal - afficher les sous-options
@@ -231,7 +236,22 @@ module.exports = {
 
         // Ajouter les champs actuels
         for (const [key, field] of Object.entries(categoryConfig.fields)) {
-          let currentValue = config[key] || "Not set";
+          let currentValue = "Not set";
+          
+          // Accéder à la bonne section de la configuration
+          if (category === "roles" && config.roles && config.roles[key]) {
+            currentValue = config.roles[key];
+          } else if (category === "channels" && config.channels && config.channels[key]) {
+            currentValue = config.channels[key];
+          } else if (category === "categories" && config.categories && config.categories[key]) {
+            currentValue = config.categories[key];
+          } else if (category === "bot" && config.bot && config.bot[key]) {
+            currentValue = config.bot[key];
+          } else if (category === "warranty" && config.warranty && config.warranty[key]) {
+            currentValue = config.warranty[key];
+          } else if (category === "tickets" && config.tickets && config.tickets[key]) {
+            currentValue = config.tickets[key];
+          }
 
           // Formater la valeur selon le type
           if (field.type === "role" && currentValue !== "Not set") {
@@ -386,16 +406,34 @@ module.exports = {
         }
 
         // Analyser la sélection
-        const [category, fieldKey] = selectedValue.split("_", 2);
+        const firstUnderscoreIndex = selectedValue.indexOf("_");
+        const category = selectedValue.substring(0, firstUnderscoreIndex);
+        const fieldKey = selectedValue.substring(firstUnderscoreIndex + 1);
         const categoryConfig = configCategories[category];
         const field = categoryConfig.fields[fieldKey];
 
         if (!field) {
           await interaction.followUp({
-            content: "Field not found!",
+            content: `Field not found! Category: ${category}, Field: ${fieldKey}`,
             flags: MessageFlags.Ephemeral,
           });
           return;
+        }
+
+        // Obtenir la valeur actuelle de la bonne section de configuration
+        let currentValue = "Not set";
+        if (category === "roles" && config.roles && config.roles[fieldKey]) {
+          currentValue = config.roles[fieldKey];
+        } else if (category === "channels" && config.channels && config.channels[fieldKey]) {
+          currentValue = config.channels[fieldKey];
+        } else if (category === "categories" && config.categories && config.categories[fieldKey]) {
+          currentValue = config.categories[fieldKey];
+        } else if (category === "bot" && config.bot && config.bot[fieldKey]) {
+          currentValue = config.bot[fieldKey];
+        } else if (category === "warranty" && config.warranty && config.warranty[fieldKey]) {
+          currentValue = config.warranty[fieldKey];
+        } else if (category === "tickets" && config.tickets && config.tickets[fieldKey]) {
+          currentValue = config.tickets[fieldKey];
         }
 
         // Créer et afficher le modal pour la modification
@@ -404,7 +442,7 @@ module.exports = {
           category,
           fieldKey,
           field,
-          config[fieldKey],
+          currentValue,
         );
       }
     } catch (error) {

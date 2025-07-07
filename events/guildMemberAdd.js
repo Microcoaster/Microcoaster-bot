@@ -22,6 +22,11 @@ module.exports = {
       // Instancier le DAO
       const warrantyDAO = new WarrantyDAO();
 
+      // Logger l'événement dans les statistiques
+      if (member.client.statsLogger) {
+        await member.client.statsLogger.logUserJoin(member);
+      }
+
       // Vérifier si c'est le serveur configuré
       const config = require("../config/config.json");
       if (guild.id !== config.guild_id) {
@@ -33,11 +38,59 @@ module.exports = {
 
       console.log(
         `👋  ${user.tag} a rejoint le serveur configuré ${guild.name}`,
-      ); // Vérifier si l'utilisateur a une garantie active
+      );
+
+      // Assigner automatiquement le rôle membre à tous les nouveaux utilisateurs
+      const memberRoleId = config.roles.member_role_id;
+      if (memberRoleId && memberRoleId !== "YOUR_MEMBER_ROLE_ID") {
+        const memberRole = guild.roles.cache.get(memberRoleId);
+        if (memberRole && !member.roles.cache.has(memberRoleId)) {
+          try {
+            await member.roles.add(memberRole);
+            console.log(`   ↳ Rôle membre assigné automatiquement à ${user.tag}`);
+            
+            // Logger l'assignation du rôle membre
+            const roleLogsChannelId = config.channels.role_logs_channel_id;
+            if (roleLogsChannelId && roleLogsChannelId !== "YOUR_ROLE_LOGS_CHANNEL_ID") {
+              const logChannel = guild.channels.cache.get(roleLogsChannelId);
+              if (logChannel) {
+                const logEmbed = new EmbedBuilder()
+                  .setColor("#0099ff")
+                  .setTitle("🎭 Automatic Member Role Assignment")
+                  .setDescription(`Member role automatically assigned to new user`)
+                  .addFields(
+                    {
+                      name: "👤 User",
+                      value: `${user.tag} (<@${user.id}>)`,
+                      inline: true,
+                    },
+                    {
+                      name: "🎭 Role Assigned",
+                      value: `${memberRole.name}`,
+                      inline: true,
+                    },
+                    {
+                      name: "🤖 Triggered By",
+                      value: "Automatic on join",
+                      inline: true,
+                    }
+                  )
+                  .setTimestamp();
+
+                await logChannel.send({ embeds: [logEmbed] });
+              }
+            }
+          } catch (error) {
+            console.error(`Erreur lors de l'assignation du rôle membre à ${user.tag}:`, error);
+          }
+        }
+      }
+
+      // Vérifier si l'utilisateur a une garantie active pour restaurer des rôles premium/warranty
       const warranty = await warrantyDAO.getUserWarranty(user.id);
 
       if (!warranty) {
-        console.log(`   ↳ Aucune garantie trouvée pour ${user.tag}`);
+        console.log(`   ↳ Aucune garantie trouvée pour ${user.tag} - rôle membre assigné uniquement`);
         return;
       } // Récupérer la configuration des rôles
       const premiumRoleId = config.roles.premium_role_id;

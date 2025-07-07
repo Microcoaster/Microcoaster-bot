@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS warranty_activation_logs (
     user_id VARCHAR(20) NULL,
     admin_id VARCHAR(20) NOT NULL,
     code_id INT NOT NULL,
-    action_type ENUM('ACTIVATE', 'EXTEND', 'DEACTIVATE', 'CODE_LINKED') NOT NULL,
+    action_type ENUM('ACTIVATE', 'EXTEND', 'DEACTIVATE', 'CODE_LINKED', 'ROLES_RESTORED') NOT NULL,
     duration_days INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (code_id) REFERENCES warranty_premium_codes(id)
@@ -133,6 +133,12 @@ INSERT INTO warranty_premium_codes (code, product_info, created_at) VALUES
 ('0987654321', 'Code de test 2 - MicroCoaster Premium', NOW()),
 ('0123456789', 'Code de test 3 - MicroCoaster Premium', NOW()),
 ('TEST123', 'Code de test 4 - MicroCoaster Premium TEST123', NOW());
+
+-- Codes de test pour les codes en attente (liés mais pas activés)
+INSERT INTO warranty_premium_codes (code, product_info, user_id, is_used, linked_at, created_at) VALUES 
+('PENDING001', 'MicroCoaster Premium - Pending Test 1', '123456789012345678', TRUE, NOW(), NOW()),
+('PENDING002', 'MicroCoaster Premium - Pending Test 2', '987654321098765432', TRUE, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+('PENDING003', 'MicroCoaster Premium - Pending Test 3', NULL, TRUE, NULL, DATE_SUB(NOW(), INTERVAL 5 DAY));
 
 -- Index pour optimiser les performances (syntaxe compatible MySQL 8.4+)
 CREATE INDEX idx_warranty_codes_user ON warranty_premium_codes(user_id);

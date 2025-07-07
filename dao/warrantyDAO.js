@@ -164,12 +164,6 @@ class WarrantyDAO {
       // Si le code n'est pas lié à un utilisateur
       if (!codeData.user_id) {
         if (userId) {
-          // Lier automatiquement le code à l'utilisateur spécifié
-          await connection.execute(
-            "UPDATE warranty_premium_codes SET user_id = ?, is_used = TRUE, linked_at = NOW() WHERE id = ?",
-            [userId, codeData.id],
-          );
-
           targetUserId = userId;
 
           // Mettre à jour la sauvegarde des rôles
@@ -185,14 +179,25 @@ class WarrantyDAO {
             `[WarrantyDAO] Activation de garantie sans utilisateur pour le code: ${code}`,
           );
         }
-      } // Activer la garantie (1 an)
+      }
+
+      // Activer la garantie (1 an) et lier l'utilisateur si nécessaire en une seule requête
       const expirationDate = new Date();
       expirationDate.setFullYear(expirationDate.getFullYear() + 1);
 
-      await connection.execute(
-        "UPDATE warranty_premium_codes SET warranty_activated = TRUE, warranty_activated_by = ?, warranty_activated_at = NOW(), warranty_expires_at = ? WHERE id = ?",
-        [adminId, expirationDate, codeData.id],
-      );
+      if (targetUserId && !codeData.user_id) {
+        // Cas 1: Lier l'utilisateur ET activer la garantie
+        await connection.execute(
+          "UPDATE warranty_premium_codes SET user_id = ?, is_used = TRUE, linked_at = NOW(), warranty_activated = TRUE, warranty_activated_by = ?, warranty_activated_at = NOW(), warranty_expires_at = ? WHERE id = ?",
+          [targetUserId, adminId, expirationDate, codeData.id],
+        );
+      } else {
+        // Cas 2: Seulement activer la garantie (code déjà lié ou activation sans utilisateur)
+        await connection.execute(
+          "UPDATE warranty_premium_codes SET warranty_activated = TRUE, warranty_activated_by = ?, warranty_activated_at = NOW(), warranty_expires_at = ? WHERE id = ?",
+          [adminId, expirationDate, codeData.id],
+        );
+      }
 
       // Mettre à jour la sauvegarde des rôles (seulement si un utilisateur est assigné)
       if (targetUserId) {
@@ -206,6 +211,10 @@ class WarrantyDAO {
       await connection.execute(
         "INSERT INTO warranty_activation_logs (user_id, admin_id, code_id, action_type, duration_days) VALUES (?, ?, ?, ?, ?)",
         [targetUserId, adminId, codeData.id, "ACTIVATE", 365],
+      );
+
+      console.log(
+        `\x1b[38;5;2m✅ Garantie activée avec succès - Code: ${code}, Utilisateur: ${targetUserId || 'Aucun'}, Admin: ${adminId}\x1b[0m`,
       );
 
       return {
@@ -254,44 +263,102 @@ class WarrantyDAO {
    */
   async extendWarranty(userId, days, adminId) {
     const connection = await this.getConnection();
-    // Récupérer les infos actuelles
-    const [userRows] = await connection.execute(
-      "SELECT warranty_expires_at FROM user_roles_backup WHERE user_id = ? AND has_warranty = TRUE",
-      [userId],
+    
+    if (userId) {
+      // Cas 1: Code lié à un utilisateur - utiliser l'ancienne logique
+      // Récupérer les infos actuelles
+      const [userRows] = await connection.execute(
+        "SELECT warranty_expires_at FROM user_roles_backup WHERE user_id = ? AND has_warranty = TRUE",
+        [userId],
+      );
+
+      if (userRows.length === 0) {
+        throw new Error("User has no active warranty");
+      }
+
+      // Calculer la nouvelle date d'expiration
+      const currentExpiration = new Date(userRows[0].warranty_expires_at);
+      const newExpiration = new Date(
+        currentExpiration.getTime() + days * 24 * 60 * 60 * 1000,
+      );
+
+      // Mettre à jour
+      await connection.execute(
+        "UPDATE user_roles_backup SET warranty_expires_at = ?, last_updated = NOW() WHERE user_id = ?",
+        [newExpiration, userId],
+      );
+
+      await connection.execute(
+        "UPDATE warranty_premium_codes SET warranty_expires_at = ? WHERE user_id = ? AND warranty_activated = TRUE",
+        [newExpiration, userId],
+      );
+
+      // Logger l'action
+      const [codeRows] = await connection.execute(
+        "SELECT id FROM warranty_premium_codes WHERE user_id = ? AND warranty_activated = TRUE LIMIT 1",
+        [userId],
+      );
+      if (codeRows.length > 0) {
+        await connection.execute(
+          "INSERT INTO warranty_activation_logs (user_id, admin_id, code_id, action_type, duration_days) VALUES (?, ?, ?, ?, ?)",
+          [userId, adminId, codeRows[0].id, "EXTEND", days],
+        );
+      }
+
+      return newExpiration;
+    } else {
+      // Cas 2: Code non lié - impossible d'étendre sans référence au code
+      throw new Error("Cannot extend warranty without user or code reference");
+    }
+  }
+
+  /**
+   * Prolonger une garantie par code (pour codes liés ou non liés)
+   */
+  async extendWarrantyByCode(code, days, adminId) {
+    const connection = await this.getConnection();
+    
+    // Récupérer les infos du code
+    const [codeRows] = await connection.execute(
+      "SELECT id, user_id, warranty_expires_at, warranty_activated FROM warranty_premium_codes WHERE code = ? AND warranty_activated = TRUE",
+      [code],
     );
 
-    if (userRows.length === 0) {
-      throw new Error("User has no active warranty");
+    if (codeRows.length === 0) {
+      throw new Error("Code not found or warranty not activated");
     }
 
+    const codeData = codeRows[0];
+    
     // Calculer la nouvelle date d'expiration
-    const currentExpiration = new Date(userRows[0].warranty_expires_at);
+    const currentExpiration = new Date(codeData.warranty_expires_at);
     const newExpiration = new Date(
       currentExpiration.getTime() + days * 24 * 60 * 60 * 1000,
     );
 
-    // Mettre à jour
+    // Mettre à jour la date d'expiration dans warranty_premium_codes
     await connection.execute(
-      "UPDATE user_roles_backup SET warranty_expires_at = ?, last_updated = NOW() WHERE user_id = ?",
-      [newExpiration, userId],
+      "UPDATE warranty_premium_codes SET warranty_expires_at = ? WHERE id = ?",
+      [newExpiration, codeData.id],
     );
 
-    await connection.execute(
-      "UPDATE warranty_premium_codes SET warranty_expires_at = ? WHERE user_id = ? AND warranty_activated = TRUE",
-      [newExpiration, userId],
-    );
-
-    // Logger l'action
-    const [codeRows] = await connection.execute(
-      "SELECT id FROM warranty_premium_codes WHERE user_id = ? AND warranty_activated = TRUE LIMIT 1",
-      [userId],
-    );
-    if (codeRows.length > 0) {
+    // Si le code est lié à un utilisateur, mettre à jour aussi user_roles_backup
+    if (codeData.user_id) {
       await connection.execute(
-        "INSERT INTO warranty_activation_logs (user_id, admin_id, code_id, action_type, duration_days) VALUES (?, ?, ?, ?, ?)",
-        [userId, adminId, codeRows[0].id, "EXTEND", days],
+        "UPDATE user_roles_backup SET warranty_expires_at = ?, last_updated = NOW() WHERE user_id = ?",
+        [newExpiration, codeData.user_id],
       );
     }
+
+    // Logger l'action
+    await connection.execute(
+      "INSERT INTO warranty_activation_logs (user_id, admin_id, code_id, action_type, duration_days) VALUES (?, ?, ?, ?, ?)",
+      [codeData.user_id, adminId, codeData.id, "EXTEND", days],
+    );
+
+    console.log(
+      `\x1b[38;5;2m✅ Garantie étendue pour le code ${code} - Nouvelle expiration: ${newExpiration.toISOString()}\x1b[0m`,
+    );
 
     return newExpiration;
   }

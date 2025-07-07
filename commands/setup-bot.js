@@ -58,6 +58,11 @@ module.exports = {
           color: "#00FF00",
           reason: "Users with active warranty",
         },
+        member_role_id: {
+          name: "Member",
+          color: "#87CEEB",
+          reason: "Default role for all server members",
+        },
         admin_role_id: {
           name: "MicroCoaster™ Admin",
           color: "#FF0000",
@@ -241,11 +246,6 @@ module.exports = {
         logs_moderation_channel_id: {
           name: "📋-moderation-logs",
           reason: "Channel for moderation logs",
-          type: ChannelType.GuildText,
-        },
-        bot_stats_channel_id: {
-          name: "📊-bot-stats",
-          reason: "Channel for bot statistics and status",
           type: ChannelType.GuildText,
         },
         role_logs_channel_id: {

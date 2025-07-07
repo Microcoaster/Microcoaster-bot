@@ -169,17 +169,34 @@ module.exports = {
       }
 
       // Réponse de confirmation
-      const successEmbed = new EmbedBuilder()
-        .setColor("#ffa500")
+      const embed = new EmbedBuilder()
+        .setColor("#ffff00")
         .setTitle("⚠️ Warning Issued")
-        .setDescription(`Successfully warned ${targetUser.tag}`)
+        .setDescription(`${targetUser.tag} has been warned.`)
         .addFields(
+          { name: "👤 User", value: `${targetUser.tag}`, inline: true },
+          { name: "👨‍💼 Moderator", value: `${moderator.tag}`, inline: true },
           { name: "📋 Reason", value: reason, inline: false },
-          { name: "📊 Total Warnings", value: `${warningCount}`, inline: true },
         )
         .setTimestamp();
 
-      await interaction.editReply({ embeds: [successEmbed] });
+      await interaction.editReply({ embeds: [embed] });
+
+      // Logger dans les statistiques du bot (non-bloquant)
+      if (interaction.client.statsLogger) {
+        setImmediate(async () => {
+          try {
+            await interaction.client.statsLogger.logModerationAction(
+              'WARN',
+              targetUser,
+              moderator,
+              reason
+            );
+          } catch (statsError) {
+            console.log("Stats logging failed (non-critical):", statsError.message);
+          }
+        });
+      }
     } catch (error) {
       console.error("Error in warn command:", error);
 

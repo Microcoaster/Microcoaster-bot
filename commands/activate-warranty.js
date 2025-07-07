@@ -25,64 +25,68 @@ module.exports = {
         .setRequired(false),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-  async execute(interaction) {
-    let isDeferred = false;
 
+  async execute(interaction) {
     try {
-      // Try to defer reply immediately, but handle failure gracefully
+      // Vérifier si l'interaction est encore valide avant de la différer
+      if (!interaction.isRepliable()) {
+        console.error(`[activate-warranty] Interaction is no longer repliable for ${interaction.user.tag}`);
+        return;
+      }
+
+      // Déferer immédiatement pour éviter l'expiration
       try {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-        isDeferred = true;
+        console.log(`[activate-warranty] Successfully deferred reply for ${interaction.user.tag}`);
       } catch (deferError) {
-        console.error("Failed to defer reply:", deferError);
-        // If defer fails, we'll try to respond directly later
+        console.error(`[activate-warranty] Failed to defer reply:`, deferError);
+        // Si on ne peut pas différer, essayer de répondre directement
+        if (!interaction.replied) {
+          try {
+            await interaction.reply({
+              content: "❌ An error occurred while processing your request. Please try again.",
+              flags: MessageFlags.Ephemeral,
+            });
+          } catch (replyError) {
+            console.error(`[activate-warranty] Failed to reply directly:`, replyError);
+          }
+        }
+        return;
       }
+
+      console.log(`[activate-warranty] Command started by ${interaction.user.tag} (${interaction.user.id})`);
 
       // Vérification des permissions admin
       if (
         !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
       ) {
-        const errorContent =
-          "❌ You need Administrator permissions to use this command.";
-
-        if (isDeferred) {
-          return await interaction.editReply({ content: errorContent });
-        } else {
-          return await interaction.reply({
-            content: errorContent,
-            flags: MessageFlags.Ephemeral,
-          });
-        }
+        console.log(`[activate-warranty] Permission denied for ${interaction.user.tag}`);
+        return await interaction.editReply({
+          content: "❌ You need Administrator permissions to use this command.",
+        });
       }
 
       const code = interaction.options.getString("code");
       const targetUser = interaction.options.getUser("user");
       const adminId = interaction.user.id;
 
-      const warrantyDAO = new WarrantyDAO();
+      console.log(`[activate-warranty] Processing code: ${code}, targetUser: ${targetUser?.tag || 'None'}`);
 
-      // Helper function to send responses based on deferred state
-      const sendResponse = async (content) => {
-        if (isDeferred) {
-          return await interaction.editReply(content);
-        } else {
-          return await interaction.reply({
-            ...content,
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-      };
+      const warrantyDAO = new WarrantyDAO();
 
       try {
         // Activer la garantie
+        console.log(`[activate-warranty] Calling activateWarranty...`);
         const result = await warrantyDAO.activateWarranty(
           code,
           adminId,
           targetUser ? targetUser.id : null,
         );
+        console.log(`[activate-warranty] ActivateWarranty completed successfully`);
 
         // Si le code a été activé sans utilisateur
         if (result.codeActivatedWithoutUser) {
+          console.log(`[activate-warranty] Code activated without user assignment`);
           const noUserEmbed = new EmbedBuilder()
             .setColor("#00ff00")
             .setTitle("✅ Code Activated Without User Assignment")
@@ -116,7 +120,7 @@ module.exports = {
             .setFooter({ text: "MicroCoaster™ Warranty System" })
             .setTimestamp();
 
-          return await sendResponse({ embeds: [noUserEmbed] });
+          return await interaction.editReply({ embeds: [noUserEmbed] });
         }
 
         // Récupérer l'utilisateur Discord si un utilisateur est assigné
@@ -131,11 +135,13 @@ module.exports = {
           const premiumRoleId = config.roles.premium_role_id;
 
           // Donner le rôle Garantie Active
+          const rolesAssigned = [];
           if (warrantyRoleId) {
             const warrantyRole =
               interaction.guild.roles.cache.get(warrantyRoleId);
             if (warrantyRole) {
               await user.roles.add(warrantyRole);
+              rolesAssigned.push("🛡️ Warranty");
               console.log(`✅ Rôle de garantie attribué à ${user.user.tag}`);
             } else {
               console.log(`❌ Rôle de garantie introuvable: ${warrantyRoleId}`);
@@ -148,7 +154,54 @@ module.exports = {
               interaction.guild.roles.cache.get(premiumRoleId);
             if (premiumRole && !user.roles.cache.has(premiumRoleId)) {
               await user.roles.add(premiumRole);
+              rolesAssigned.push("🎖️ Premium");
               console.log(`✅ Rôle premium attribué à ${user.user.tag}`);
+            }
+          }
+
+          // Logger dans le canal de logs de rôles
+          const roleLogsChannelId = config.channels.role_logs_channel_id;
+          if (roleLogsChannelId && rolesAssigned.length > 0) {
+            const logChannel = interaction.guild.channels.cache.get(roleLogsChannelId);
+            if (logChannel) {
+              const logEmbed = new EmbedBuilder()
+                .setColor("#00ff00")
+                .setTitle("🛡️ Warranty Activation - Roles Assigned")
+                .setDescription(`Roles assigned during admin warranty activation`)
+                .addFields(
+                  {
+                    name: "👤 User",
+                    value: `${user.user.tag} (<@${result.userId}>)`,
+                    inline: true,
+                  },
+                  {
+                    name: "🎫 Code",
+                    value: `\`${code}\``,
+                    inline: true,
+                  },
+                  {
+                    name: "🎭 Roles Assigned",
+                    value: rolesAssigned.join(", "),
+                    inline: true,
+                  },
+                  {
+                    name: "👨‍💼 Activated By",
+                    value: `<@${adminId}>`,
+                    inline: true,
+                  },
+                  {
+                    name: "⚡ Trigger",
+                    value: "Admin warranty activation",
+                    inline: false,
+                  }
+                )
+                .setTimestamp();
+
+              try {
+                await logChannel.send({ embeds: [logEmbed] });
+              } catch (logError) {
+                console.error(`Error sending role log for warranty activation:`, logError);
+              }
             }
           }
 
@@ -178,7 +231,7 @@ module.exports = {
             .setFooter({ text: "MicroCoaster™ Warranty System" })
             .setTimestamp();
 
-          await sendResponse({ embeds: [adminEmbed] });
+          await interaction.editReply({ embeds: [adminEmbed] });
 
           // Envoyer un message privé à l'utilisateur
           try {
@@ -248,9 +301,11 @@ module.exports = {
             .setFooter({ text: "MicroCoaster™ Warranty System" })
             .setTimestamp();
 
-          await sendResponse({ embeds: [warningEmbed] });
+          await interaction.editReply({ embeds: [warningEmbed] });
         }
       } catch (warrantyError) {
+        console.error("Warranty activation error:", warrantyError);
+
         let errorMessage = "An unknown error occurred.";
         let suggestion = "Please try again or contact support.";
 
@@ -275,7 +330,7 @@ module.exports = {
           .setFooter({ text: "MicroCoaster™ Warranty System" })
           .setTimestamp();
 
-        await sendResponse({ embeds: [errorEmbed] });
+        await interaction.editReply({ embeds: [errorEmbed] });
       }
     } catch (error) {
       console.error("Error in activate-warranty command:", error);
@@ -288,8 +343,9 @@ module.exports = {
         )
         .setFooter({ text: "Please contact the developer if this persists." })
         .setTimestamp();
+
       try {
-        // Vérifier de manière plus stricte l'état de l'interaction
+        // Vérifier l'état de l'interaction avant d'essayer de répondre
         if (interaction.deferred && !interaction.replied) {
           await interaction.editReply({ embeds: [errorEmbed] });
         } else if (!interaction.replied && !interaction.deferred) {
@@ -298,10 +354,7 @@ module.exports = {
             flags: MessageFlags.Ephemeral,
           });
         } else {
-          // L'interaction a déjà été traitée, ne rien faire
-          console.log(
-            "Interaction déjà traitée, impossible de renvoyer un message d'erreur",
-          );
+          console.log(`[activate-warranty] Interaction already handled, cannot send error message`);
         }
       } catch (replyError) {
         console.error("Could not send error message to user:", replyError);

@@ -32,6 +32,7 @@ module.exports = {
       const roleFields = [
         { key: "premium_role_id", name: "Premium Role" },
         { key: "warranty_role_id", name: "Warranty Role" },
+        { key: "member_role_id", name: "Member Role" },
         { key: "admin_role_id", name: "Admin Role" },
         { key: "support_team_role_id", name: "Support Team" },
         { key: "technical_team_role_id", name: "Technical Team" },
@@ -63,7 +64,6 @@ module.exports = {
         { key: "warranty_activation_channel_id", name: "Warranty Activation" },
         { key: "support_channel_id", name: "Support Channel" },
         { key: "logs_moderation_channel_id", name: "Moderation Logs" },
-        { key: "bot_stats_channel_id", name: "Bot Stats" },
         { key: "role_logs_channel_id", name: "Role Logs" },
       ];
 
@@ -143,7 +143,6 @@ module.exports = {
       // Section Paramètres Tickets
       const ticketsConfig = config.tickets || {};
       const ticketValue =
-        `**Auto Close:** ${ticketsConfig.auto_close_after_hours || config.ticket_auto_close_after_hours || 24} hours\n` +
         `**Max Per User:** ${ticketsConfig.max_tickets_per_user || config.max_tickets_per_user || 3}\n` +
         `**Default Priority:** ${ticketsConfig.default_priority || config.default_ticket_priority || "medium"}`;
 
@@ -191,6 +190,7 @@ async function getConfigurationStats(config) {
   const configFields = [
     "premium_role_id",
     "warranty_role_id",
+    "member_role_id",
     "admin_role_id",
     "support_team_role_id",
     "technical_team_role_id",
@@ -199,7 +199,6 @@ async function getConfigurationStats(config) {
     "warranty_activation_channel_id",
     "support_channel_id",
     "logs_moderation_channel_id",
-    "bot_stats_channel_id",
     "role_logs_channel_id",
     "technical_category_id",
     "product_category_id",

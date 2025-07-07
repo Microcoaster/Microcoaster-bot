@@ -36,7 +36,23 @@ module.exports = {
         console.log(
           `\x1b[38;5;4mCommande exécutée par ${user}: ${interaction.commandName}\x1b[0m`,
         );
+
         await command.execute(interaction);
+
+        // Logger la commande dans les statistiques après l'exécution (non-bloquant)
+        if (interaction.client.statsLogger) {
+          setImmediate(async () => {
+            try {
+              await interaction.client.statsLogger.logCommand(
+                interaction.commandName,
+                interaction.user,
+                interaction.guild,
+              );
+            } catch (statsError) {
+              console.log("Stats logging failed (non-critical):", statsError.message);
+            }
+          });
+        }
       } catch (error) {
         console.error(
           `⚠️\x1b[38;5;1m  Erreur lors de l'exécution de la commande ${interaction.commandName} par ${user}:`,

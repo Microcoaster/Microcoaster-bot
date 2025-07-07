@@ -54,7 +54,8 @@ module.exports = {
         .setColor("#0099ff")
         .setTitle(`📋 Pending Warranty Codes (${pendingCodes.length} total)`)
         .setDescription(
-          `Showing warranty codes created in the last ${days} days that haven't been activated yet.`,
+          `Codes awaiting activation from the last ${days} days.\n` +
+          `Use \`/activate-warranty\` to activate them.`
         )
         .setTimestamp();
 
@@ -66,13 +67,27 @@ module.exports = {
       for (let i = 0; i < displayCodes.length; i++) {
         const code = displayCodes[i];
         const createdDate = new Date(code.created_at);
-        const expirationDate = new Date(code.expiration_date);
+        const linkedDate = code.linked_at ? new Date(code.linked_at) : null;
 
-        const codeInfo =
-          `**${code.warranty_code}**\n` +
-          `Product: ${code.product_type}\n` +
-          `Created: <t:${Math.floor(createdDate.getTime() / 1000)}:R>\n` +
-          `Expires: <t:${Math.floor(expirationDate.getTime() / 1000)}:R>\n\n`;
+        let codeInfo = `**${code.code}**\n`;
+        
+        if (code.product_info) {
+          codeInfo += `Product: ${code.product_info}\n`;
+        }
+        
+        codeInfo += `Created: <t:${Math.floor(createdDate.getTime() / 1000)}:R>\n`;
+        
+        if (linkedDate) {
+          codeInfo += `Linked: <t:${Math.floor(linkedDate.getTime() / 1000)}:R>\n`;
+        }
+        
+        if (code.user_id) {
+          codeInfo += `User: <@${code.user_id}>\n`;
+        } else {
+          codeInfo += `Status: Not linked to user\n`;
+        }
+        
+        codeInfo += `\n`;
 
         // Si ajouter ce code dépasserait la limite, créer un nouveau field
         if (currentField.length + codeInfo.length > maxFieldLength) {
@@ -105,20 +120,15 @@ module.exports = {
       }
 
       // Ajouter des statistiques
-      const now = new Date();
-      const expiredCodes = displayCodes.filter(
-        (code) => new Date(code.expiration_date) <= now,
-      );
-      const validCodes = displayCodes.filter(
-        (code) => new Date(code.expiration_date) > now,
-      );
+      const linkedCodes = displayCodes.filter(code => code.user_id);
+      const unlinkedCodes = displayCodes.filter(code => !code.user_id);
 
       embed.addFields({
         name: "📊 Statistics",
         value:
           `**Total Pending:** ${pendingCodes.length}\n` +
-          `**Valid:** ${validCodes.length}\n` +
-          `**Expired:** ${expiredCodes.length}` +
+          `**Linked to Users:** ${linkedCodes.length}\n` +
+          `**Not Linked:** ${unlinkedCodes.length}` +
           (hasMore ? `\n**Note:** Only showing first 25 codes` : ""),
         inline: false,
       });

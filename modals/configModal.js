@@ -127,6 +127,7 @@ async function validateConfigValue(interaction, fieldKey, value) {
     // Roles
     premium_role_id: "role",
     warranty_role_id: "role",
+    member_role_id: "role",
     admin_role_id: "role",
     support_team_role_id: "role",
     technical_team_role_id: "role",
@@ -137,7 +138,6 @@ async function validateConfigValue(interaction, fieldKey, value) {
     warranty_activation_channel_id: "channel",
     support_channel_id: "channel",
     logs_moderation_channel_id: "channel",
-    bot_stats_channel_id: "channel",
     role_logs_channel_id: "channel",
 
     // Categories
@@ -157,7 +157,6 @@ async function validateConfigValue(interaction, fieldKey, value) {
     cleanup_interval_hours: "number",
 
     // Ticket settings
-    ticket_auto_close_after_hours: "number",
     max_tickets_per_user: "number",
     default_ticket_priority: "select",
   };
@@ -225,15 +224,6 @@ async function validateConfigValue(interaction, fieldKey, value) {
         return {
           valid: false,
           error: "Cleanup interval must be between 1 and 168 hours (1 week).",
-        };
-      }
-      if (
-        fieldKey === "ticket_auto_close_after_hours" &&
-        (num < 1 || num > 720)
-      ) {
-        return {
-          valid: false,
-          error: "Auto close time must be between 1 and 720 hours (30 days).",
         };
       }
       if (fieldKey === "max_tickets_per_user" && (num < 1 || num > 10)) {
@@ -321,6 +311,7 @@ function formatConfigValue(value, fieldKey, guild) {
   const fieldTypes = {
     premium_role_id: "role",
     warranty_role_id: "role",
+    member_role_id: "role",
     admin_role_id: "role",
     support_team_role_id: "role",
     technical_team_role_id: "role",
@@ -329,7 +320,6 @@ function formatConfigValue(value, fieldKey, guild) {
     warranty_activation_channel_id: "channel",
     support_channel_id: "channel",
     logs_moderation_channel_id: "channel",
-    bot_stats_channel_id: "channel",
     role_logs_channel_id: "channel",
     technical_category_id: "category",
     product_category_id: "category",
@@ -381,7 +371,6 @@ function getFieldDisplayName(fieldKey) {
     warranty_activation_channel_id: "Warranty Activation Channel",
     support_channel_id: "Support Channel",
     logs_moderation_channel_id: "Moderation Logs Channel",
-    bot_stats_channel_id: "Bot Stats Channel",
     role_logs_channel_id: "Role Logs Channel",
     technical_category_id: "Technical Category",
     product_category_id: "Product Category",
@@ -393,7 +382,6 @@ function getFieldDisplayName(fieldKey) {
     default_warranty_duration_months: "Default Warranty Duration",
     max_activation_attempts: "Max Activation Attempts",
     cleanup_interval_hours: "Cleanup Interval",
-    ticket_auto_close_after_hours: "Ticket Auto Close Time",
     max_tickets_per_user: "Max Tickets Per User",
     default_ticket_priority: "Default Ticket Priority",
   };
@@ -404,50 +392,9 @@ function getFieldDisplayName(fieldKey) {
 /**
  * Enregistre le changement de configuration dans les logs
  */
-async function logConfigChange(
-  client,
-  config,
-  category,
-  fieldKey,
-  oldValue,
-  newValue,
-  user,
-) {
-  try {
-    const statsChannelId = config.channels
-      ? config.channels.bot_stats_channel_id
-      : config.bot_stats_channel_id;
-    if (!statsChannelId) return;
-
-    const logChannel = client.channels.cache.get(statsChannelId);
-    if (!logChannel) return;
-
-    const logEmbed = new EmbedBuilder()
-      .setColor("#ffa500")
-      .setTitle("⚙️ Configuration Changed")
-      .addFields(
-        { name: "Setting", value: getFieldDisplayName(fieldKey), inline: true },
-        { name: "Changed By", value: `${user.tag}`, inline: true },
-        {
-          name: "Previous Value",
-          value: formatConfigValue(oldValue, fieldKey, logChannel.guild),
-          inline: false,
-        },
-        {
-          name: "New Value",
-          value: formatConfigValue(newValue, fieldKey, logChannel.guild),
-          inline: false,
-        },
-      )
-      .setTimestamp();
-
-    await logChannel.send({ embeds: [logEmbed] });
-  } catch (error) {
-    console.error(
-      "Erreur lors de l'enregistrement du log de configuration:",
-      error,
-    );
-  }
+async function logConfigChange() {
+  // Configuration logging disabled - bot stats channel removed
+  return;
 }
 
 /**

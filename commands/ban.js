@@ -200,6 +200,22 @@ module.exports = {
 
         await interaction.editReply({ embeds: [successEmbed] });
 
+        // Logger dans les statistiques du bot (non-bloquant)
+        if (interaction.client.statsLogger) {
+          setImmediate(async () => {
+            try {
+              await interaction.client.statsLogger.logModerationAction(
+                'BAN',
+                targetUser,
+                moderator,
+                `${reason} (Duration: ${durationDisplay})`
+              );
+            } catch (statsError) {
+              console.log("Stats logging failed (non-critical):", statsError.message);
+            }
+          });
+        }
+
         // Log dans le canal de modération
         if (config.channels.logs_moderation_channel_id) {
           const logChannel = interaction.guild.channels.cache.get(

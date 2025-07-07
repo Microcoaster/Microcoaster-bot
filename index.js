@@ -13,6 +13,7 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const { initializeDatabase } = require("./utils/dbInit");
 const BanExpirationHandler = require("./utils/banExpirationHandler");
 const SimpleModerationSystem = require("./utils/simpleModerationSystem");
+const ConfigManager = require("./utils/configManager");
 
 (async () => {
   try {

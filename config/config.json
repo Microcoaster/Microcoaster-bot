@@ -3,6 +3,7 @@
   "roles": {
     "premium_role_id": "1390666663287853159",
     "warranty_role_id": "1390666664067993762",
+    "member_role_id": "1391922710342271198",
     "admin_role_id": "1390666665376747592",
     "support_team_role_id": "1390666666186379315",
     "technical_team_role_id": "1390666666668720150",
@@ -13,7 +14,6 @@
     "warranty_activation_channel_id": "1390666675636015207",
     "support_channel_id": "1390666677036781578",
     "logs_moderation_channel_id": "1390666678227959819",
-    "bot_stats_channel_id": "1390666679788372028",
     "role_logs_channel_id": "1390666680677699624"
   },
   "categories": {
@@ -29,12 +29,14 @@
   },
   "warranty": {
     "default_duration_months": 12,
-    "reminder_days": [30, 7],
+    "reminder_days": [
+      30,
+      7
+    ],
     "max_activation_attempts": 3,
     "cleanup_interval_hours": 24
   },
   "tickets": {
-    "auto_close_after_hours": 24,
     "max_tickets_per_user": 3,
     "default_priority": "medium"
   }
