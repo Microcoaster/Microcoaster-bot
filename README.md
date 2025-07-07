@@ -38,6 +38,7 @@ MicroCoaster™ Bot is a comprehensive Discord bot designed specifically for man
 ## ✨ Features
 
 ### Warranty Management
+
 - 📦 **Code Activation**: Users can activate premium codes through interactive interface
 - 🛡️ **Warranty Activation**: Admin-controlled warranty activation system
 - ⏱️ **Automatic Reminders**: 30-day and 7-day expiration warnings
@@ -45,12 +46,14 @@ MicroCoaster™ Bot is a comprehensive Discord bot designed specifically for man
 - 📈 **Extensions & Management**: Admin tools for warranty extension and management
 
 ### Support System
+
 - 🎫 **Multi-Category Tickets**: Technical, Product, Business, and Recruitment support
 - 🏷️ **Smart Organization**: Automatic ticket categorization and numbering
 - 👥 **Team Routing**: Automatic staff notifications based on ticket type
 - 📝 **Rich Templates**: Pre-configured response templates and guidance
 
 ### Moderation & Automation
+
 - 🤖 **Automated Role Management**: Smart role assignment and restoration
 - 🔍 **Integrity Checks**: Startup verification of user roles and warranties
 - 📅 **Scheduled Tasks**: Daily cleanup and reminder processing
@@ -76,6 +79,7 @@ npm install
 ### Step 2: Database Setup
 
 1. Create a MySQL database:
+
 ```sql
 CREATE DATABASE microcoaster_bot;
 CREATE USER 'bot_user'@'localhost' IDENTIFIED BY 'your_secure_password';
@@ -84,6 +88,7 @@ FLUSH PRIVILEGES;
 ```
 
 2. Import the database schema:
+
 ```bash
 mysql -u bot_user -p microcoaster_bot < sql/microcoaster_tables.sql
 ```
@@ -91,11 +96,13 @@ mysql -u bot_user -p microcoaster_bot < sql/microcoaster_tables.sql
 ### Step 3: Environment Configuration
 
 1. Copy the environment template:
+
 ```bash
 cp .env.example .env
 ```
 
 2. Edit `.env` with your configuration:
+
 ```env
 TOKEN=your_discord_bot_token
 ID=your_discord_bot_client_id
@@ -126,6 +133,7 @@ Once the bot is running and invited to your server with Administrator permission
 ```
 
 This single command will automatically:
+
 - ✅ Create all required roles with proper colors and permissions
 - ✅ Create all support categories (Technical, Product, Business, Recruitment)
 - ✅ Create all necessary channels (warranty, support, logs, stats)
@@ -155,6 +163,7 @@ This single command will automatically:
 After using `/setup-bot`, your server is completely ready! The bot will display a confirmation message showing all created elements.
 
 **Quick Test:**
+
 1. Go to the 🎫-support channel
 2. Click one of the ticket creation buttons
 3. Verify the ticket system works correctly
@@ -182,7 +191,7 @@ For servers wanting immediate deployment:
   "premium_role_id": "PREMIUM_ROLE_ID",
   "warranty_role_id": "WARRANTY_ROLE_ID",
   "admin_role_id": "ADMIN_ROLE_ID",
-  "support_team_role_id": "SUPPORT_TEAM_ROLE_ID",
+  "support_team_role_id": "SUPPORT_TEAM_ROLE_ID"
   // ... additional configuration
 }
 ```
@@ -190,11 +199,13 @@ For servers wanting immediate deployment:
 ### Creating Test Data
 
 Initialize test warranty codes:
+
 ```bash
 node utils/initTestCodes.js
 ```
 
 This creates several test codes:
+
 - `MC-TEST-001` through `MC-TRIAL-005`
 
 ## 🎮 Usage
@@ -202,15 +213,19 @@ This creates several test codes:
 ### For Administrators
 
 1. **Setup Warranty System**:
+
    ```
    /setup-warranty
    ```
+
    Creates the warranty activation interface in the current channel.
 
 2. **Setup Support System**:
+
    ```
    /setup-tickets
    ```
+
    Creates the ticket system interface with category buttons.
 
 3. **Warranty Management**:
@@ -237,43 +252,45 @@ This creates several test codes:
 
 ### Setup & Configuration Commands
 
-| Command | Description | Usage | Required Permissions |
-|---------|-------------|-------|---------------------|
-| `/setup-bot` | **🆕 Complete automated server setup** | `/setup-bot [overwrite:true]` | Administrator |
-| `/config` | Modify bot configuration dynamically | `/config` | Administrator |
-| `/config-view` | View current bot configuration | `/config-view` | Administrator |
+| Command        | Description                            | Usage                         | Required Permissions |
+| -------------- | -------------------------------------- | ----------------------------- | -------------------- |
+| `/setup-bot`   | **🆕 Complete automated server setup** | `/setup-bot [overwrite:true]` | Administrator        |
+| `/config`      | Modify bot configuration dynamically   | `/config`                     | Administrator        |
+| `/config-view` | View current bot configuration         | `/config-view`                | Administrator        |
 
 ### Admin Commands
 
-| Command | Description | Usage | Required Permissions |
-|---------|-------------|-------|---------------------|
-| `/setup-warranty` | Setup warranty activation system | `/setup-warranty` | Manage Channels |
-| `/activate-warranty` | Activate warranty for a code | `/activate-warranty MC-CODE-123` | Admin Role |
-| `/warranty-check` | Check user warranty status | `/warranty-check @user` | Admin Role |
-| `/warranty-extend` | Extend user warranty | `/warranty-extend @user 6` | Admin Role |
-| `/force-restore-roles` | Force restore user roles | `/force-restore-roles @user` | Admin Role |
-| `/list-pending-warranties` | List pending warranty codes | `/list-pending-warranties` | Admin Role |
+| Command                    | Description                      | Usage                            | Required Permissions |
+| -------------------------- | -------------------------------- | -------------------------------- | -------------------- |
+| `/setup-warranty`          | Setup warranty activation system | `/setup-warranty`                | Manage Channels      |
+| `/activate-warranty`       | Activate warranty for a code     | `/activate-warranty MC-CODE-123` | Admin Role           |
+| `/warranty-check`          | Check user warranty status       | `/warranty-check @user`          | Admin Role           |
+| `/warranty-extend`         | Extend user warranty             | `/warranty-extend @user 6`       | Admin Role           |
+| `/force-restore-roles`     | Force restore user roles         | `/force-restore-roles @user`     | Admin Role           |
+| `/list-pending-warranties` | List pending warranty codes      | `/list-pending-warranties`       | Admin Role           |
 
 ### User Commands
 
-| Action | Description | How To |
-|--------|-------------|--------|
-| Activate Code | Link premium code to account | Click "Activate my code" button |
-| Create Ticket | Open support ticket | Click category button in support channel |
+| Action        | Description                  | How To                                   |
+| ------------- | ---------------------------- | ---------------------------------------- |
+| Activate Code | Link premium code to account | Click "Activate my code" button          |
+| Create Ticket | Open support ticket          | Click category button in support channel |
 
 ### 🎯 Featured: `/setup-bot` Command
 
 The `/setup-bot` command is the **fastest way to deploy** the MicroCoaster™ bot:
 
 **What it creates automatically:**
+
 - ✅ **7 Roles**: Premium, Warranty, Admin, and team roles with proper colors
 - ✅ **4 Categories**: Technical, Product, Business, and Recruitment support
-- ✅ **5 Channels**: Warranty, support, and various log channels  
+- ✅ **5 Channels**: Warranty, support, and various log channels
 - ✅ **Permissions**: Configured appropriately for each role and channel
 - ✅ **Ticket System**: Fully functional with interactive buttons
 - ✅ **Configuration**: All IDs saved automatically to config.json
 
 **Usage:**
+
 ```
 /setup-bot                    # Create all elements (skip existing)
 /setup-bot overwrite:true     # Recreate everything (overwrite existing)
@@ -317,6 +334,7 @@ For complete schema, see: `sql/microcoaster_tables.sql`
 ### Comprehensive Logging
 
 All actions are logged with:
+
 - User ID and action details
 - Timestamps and performed by information
 - Full audit trail for compliance
@@ -334,6 +352,7 @@ This bot is designed specifically for MicroCoaster™. For customization or cont
 ## 📞 Support
 
 For technical support:
+
 - Create an issue in this repository
 - Contact the development team
 - Check the `CDC_FR.md` or `CDC_EN.md` for detailed specifications
@@ -469,11 +488,13 @@ discord-bot-template/
 Le template inclut plusieurs commandes prêtes à l'emploi :
 
 ### Commandes de base
+
 - `/ping` - Teste la latence du bot
 - `/help` - Affiche l'aide avec la liste des commandes
 - `/user [utilisateur]` - Affiche les infos d'un utilisateur
 
 ### Commandes avancées
+
 - `/exemple1` - Démontre les sous-commandes et groupes
   - `/exemple1 info [type]` - Informations diverses
   - `/exemple1 test [message]` - Commande de test
@@ -483,11 +504,13 @@ Le template inclut plusieurs commandes prêtes à l'emploi :
   - `/exemple1 moderation kick <user> [raison]` - Expulsion
 
 ### Commandes interactives
+
 - `/button-example` - Démontre l'utilisation de boutons
 - `/bouton-exemple` - Boutons interactifs avec actions
 - `/modal-example` - Ouvre un formulaire (modal)
 
 ### Commandes base de données
+
 - `/bdd-exemple profil [utilisateur]` - Profil avec statistiques
 - `/bdd-exemple classement [limite]` - Top utilisateurs
 - `/bdd-exemple xp <quantité>` - Ajouter de l'expérience
@@ -500,11 +523,13 @@ Le template inclut plusieurs commandes prêtes à l'emploi :
 Le template inclut un système complet de base de données avec :
 
 ### Tables d'exemple
+
 - **`users`** : Utilisateurs avec niveau, expérience, coins
 - **`user_stats`** : Statistiques détaillées d'utilisation
 - **`activity_logs`** : Journalisation des activités
 
 ### Fonctionnalités BDD
+
 - ✅ **DAO modulaires** pour chaque table
 - ✅ **Système d'expérience** et de niveaux automatique
 - ✅ **Classements** par niveau et XP
@@ -513,6 +538,7 @@ Le template inclut un système complet de base de données avec :
 - ✅ **Statistiques** de commandes et temps
 
 ### Initialisation
+
 ```bash
 # Les tables se créent automatiquement au premier lancement
 npm start
@@ -528,6 +554,7 @@ mysql -u root -p votre_database < sql/init_tables.sql
 Le template inclut plusieurs scripts NPM pour faciliter le développement :
 
 ### Scripts de base
+
 ```bash
 # Lancer le bot en production
 npm start
@@ -540,6 +567,7 @@ npm run setup
 ```
 
 ### Scripts de qualité de code
+
 ```bash
 # Vérifier le code avec ESLint
 npm run lint
@@ -556,6 +584,7 @@ npm run prettier
 ## 🛠️ Initialisation du projet
 
 ### Installation complète
+
 Voici les étapes détaillées pour initialiser votre bot Discord :
 
 ```bash
@@ -604,6 +633,7 @@ npm start
    - Utilisez l'URL générée pour inviter votre bot
 
 ### Première exécution
+
 ```bash
 # Le bot va automatiquement :
 # - Créer les tables de base de données (si configurées)
@@ -622,12 +652,14 @@ Ce template inclut des outils modernes pour maintenir un code de qualité profes
 ### 🔍 ESLint - Analyse statique du code
 
 **À quoi ça sert :**
+
 - Détecte les erreurs de syntaxe et les bugs potentiels
 - Applique des règles de style cohérentes
 - Améliore la lisibilité et la maintenabilité du code
 - Évite les erreurs courantes en JavaScript
 
 **Comment l'utiliser :**
+
 ```bash
 # Analyser tout le projet
 npm run lint
@@ -643,6 +675,7 @@ npx eslint commands/exemple1.js
 ```
 
 **Exemple de sortie :**
+
 ```
 ✨ ESLint vérifie votre code...
 
@@ -657,12 +690,14 @@ commands/exemple1.js
 ### 🎨 Prettier - Formatage automatique
 
 **À quoi ça sert :**
+
 - Formate automatiquement le code selon des règles cohérentes
 - Élimine les débats sur le style de code dans l'équipe
 - Assure une présentation uniforme dans tout le projet
 - Supporte JSON, Markdown, et autres formats
 
 **Comment l'utiliser :**
+
 ```bash
 # Formater tout le projet
 npm run prettier
@@ -693,6 +728,7 @@ Le projet utilise une configuration Prettier optimisée pour JavaScript. Vous po
 ### 🔄 Workflow recommandé
 
 **Avant de committer :**
+
 ```bash
 # 1. Formater le code
 npm run prettier
@@ -708,6 +744,7 @@ npm start
 ```
 
 **Intégration avec votre éditeur :**
+
 - **VS Code** : Installez les extensions ESLint et Prettier
 - **WebStorm** : ESLint et Prettier sont intégrés par défaut
 - **Vim/Neovim** : Utilisez des plugins comme ALE ou CoC
@@ -716,6 +753,7 @@ npm start
 
 **Ignorer des fichiers :**
 Créez `.eslintignore` et `.prettierignore` :
+
 ```
 node_modules/
 *.min.js
@@ -724,20 +762,22 @@ dist/
 
 **Règles ESLint personnalisées :**
 Modifiez `eslint.config.mjs` pour ajuster les règles :
+
 ```javascript
 export default [
   // ...existing config...
   {
     rules: {
-      "no-console": "warn",  // Permettre console.log en dev
+      "no-console": "warn", // Permettre console.log en dev
       "no-unused-vars": "error",
       // Vos règles personnalisées
-    }
-  }
+    },
+  },
 ];
 ```
 
 ### Conventions
+
 - **Noms de fichiers** : camelCase pour les fichiers, kebab-case pour les dossiers
 - **Fonctions** : Documentation JSDoc pour les fonctions importantes
 - **Structure** : Un fichier par commande/événement/bouton
@@ -748,6 +788,7 @@ export default [
 ## 🎯 Exemples d'utilisation
 
 ### Créer une nouvelle commande
+
 ```javascript
 // commands/ma-commande.js
 const { SlashCommandBuilder } = require("discord.js");
@@ -764,6 +805,7 @@ module.exports = {
 ```
 
 ### Ajouter un bouton
+
 ```javascript
 // buttons/mon-bouton.js
 module.exports = {
@@ -774,6 +816,7 @@ module.exports = {
 ```
 
 ### Utiliser la base de données
+
 ```javascript
 const exempleDAO = require("../dao/exempleDAO");
 
@@ -800,6 +843,7 @@ Les contributions sont les bienvenues ! Pour contribuer :
 5. Ouvrez une **Pull Request**
 
 ### Règles de contribution
+
 - Respectez le style de code existant
 - Ajoutez des tests si nécessaire
 - Documentez les nouvelles fonctionnalités

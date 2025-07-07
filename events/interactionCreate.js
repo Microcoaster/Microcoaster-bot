@@ -22,9 +22,7 @@ module.exports = {
     const user = interaction.guild
       ? interaction.guild.members.cache.get(interaction.user.id)?.displayName ||
         interaction.user.username
-      : interaction.user.username;
-
-    // Gestion des commandes slash
+      : interaction.user.username; // Gestion des commandes slash
     if (interaction.isCommand()) {
       const command = client.commands.get(interaction.commandName);
       if (!command) {
@@ -44,19 +42,35 @@ module.exports = {
           `⚠️\x1b[38;5;1m  Erreur lors de l'exécution de la commande ${interaction.commandName} par ${user}:`,
           error,
         );
-        await interaction.reply({
-          content:
-            "Une erreur s'est produite lors de l'exécution de cette commande.",
-          flags: MessageFlags.Ephemeral,
-        });
+
+        try {
+          // Check if the interaction has been deferred or replied to
+          if (interaction.deferred) {
+            await interaction.editReply({
+              content:
+                "Une erreur s'est produite lors de l'exécution de cette commande.",
+            });
+          } else if (!interaction.replied) {
+            await interaction.reply({
+              content:
+                "Une erreur s'est produite lors de l'exécution de cette commande.",
+              flags: MessageFlags.Ephemeral,
+            });
+          }
+        } catch (replyError) {
+          console.error(
+            `⚠️\x1b[38;5;1m  Could not send error message to user:`,
+            replyError,
+          );
+        }
       }
     }
 
     // Gestion des soumissions de modal (formulaire)
     if (interaction.isModalSubmit()) {
       // Gérer les modals de configuration spécialement
-      if (interaction.customId.startsWith('config_modal_')) {
-        const configModalHandler = require('../modals/configModal');
+      if (interaction.customId.startsWith("config_modal_")) {
+        const configModalHandler = require("../modals/configModal");
         try {
           console.log(
             `\x1b[38;5;2mModal de configuration soumis par ${user}: ${interaction.customId}\x1b[0m`,
@@ -89,6 +103,22 @@ module.exports = {
             `⚠️\x1b[38;5;1m  Erreur lors du traitement du modal ${interaction.customId} par ${user}:`,
             error,
           );
+
+          // Only try to respond if the interaction hasn't been handled yet
+          try {
+            if (!interaction.replied && !interaction.deferred) {
+              await interaction.reply({
+                content:
+                  "Une erreur s'est produite lors du traitement de ce formulaire.",
+                flags: MessageFlags.Ephemeral,
+              });
+            }
+          } catch (replyError) {
+            console.error(
+              `⚠️\x1b[38;5;1m  Could not send error message for modal interaction:`,
+              replyError,
+            );
+          }
         }
       } else {
         console.error(
@@ -101,22 +131,34 @@ module.exports = {
     if (interaction.isButton()) {
       // On divise le customId pour extraire le nom et les paramètres éventuels
       const [buttonName, ...params] = interaction.customId.split(":");
-      
+
       // Mapping pour les boutons de ticket - tous utilisent le handler unifié
-      const ticketTypes = ['ticket_technical', 'ticket_product', 'ticket_business', 'ticket_recruitment'];
-      
+      const ticketTypes = [
+        "ticket_technical",
+        "ticket_product",
+        "ticket_business",
+        "ticket_recruitment",
+      ];
+
       let buttonHandlerPath;
       let handlerName = buttonName;
-      
+
       if (ticketTypes.includes(buttonName)) {
         // Tous les types de tickets utilisent le handler unifié
-        buttonHandlerPath = path.join(__dirname, "../buttons", "ticketHandler.js");
-        handlerName = 'ticketHandler';
+        buttonHandlerPath = path.join(
+          __dirname,
+          "../buttons",
+          "ticketHandler.js",
+        );
+        handlerName = "ticketHandler";
       } else {
         // Autres boutons utilisent leur propre handler
-        buttonHandlerPath = path.join(__dirname, "../buttons", `${buttonName}.js`);
+        buttonHandlerPath = path.join(
+          __dirname,
+          "../buttons",
+          `${buttonName}.js`,
+        );
       }
-
       if (fs.existsSync(buttonHandlerPath)) {
         const buttonHandler = require(buttonHandlerPath);
         try {
@@ -129,6 +171,22 @@ module.exports = {
             `⚠️\x1b[38;5;1m  Erreur lors du traitement du bouton ${interaction.customId} par ${user}:`,
             error,
           );
+
+          // Only try to respond if the interaction hasn't been handled yet
+          try {
+            if (!interaction.replied && !interaction.deferred) {
+              await interaction.reply({
+                content:
+                  "Une erreur s'est produite lors du traitement de cette action.",
+                flags: MessageFlags.Ephemeral,
+              });
+            }
+          } catch (replyError) {
+            console.error(
+              `⚠️\x1b[38;5;1m  Could not send error message for button interaction:`,
+              replyError,
+            );
+          }
         }
       } else {
         console.error(
@@ -141,10 +199,10 @@ module.exports = {
     if (interaction.isStringSelectMenu()) {
       // On divise le customId pour extraire le nom et les paramètres éventuels
       const [menuName, ...params] = interaction.customId.split(":");
-      
+
       // Gérer les menus de configuration spécialement
-      if (interaction.customId.startsWith('config_')) {
-        const configHandler = require('../buttons/configHandler');
+      if (interaction.customId.startsWith("config_")) {
+        const configHandler = require("../buttons/configHandler");
         try {
           console.log(
             `\x1b[38;5;5mMenu de configuration utilisé par ${user}: ${interaction.customId}\x1b[0m`,
@@ -158,10 +216,14 @@ module.exports = {
         }
         return;
       }
-      
+
       // Gérer les autres menus (tickets, etc.)
-      const menuHandlerPath = path.join(__dirname, "../buttons", `${menuName}.js`);
-      
+      const menuHandlerPath = path.join(
+        __dirname,
+        "../buttons",
+        `${menuName}.js`,
+      );
+
       if (fs.existsSync(menuHandlerPath)) {
         const menuHandler = require(menuHandlerPath);
         try {

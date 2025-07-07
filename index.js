@@ -11,6 +11,8 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 // Importer et attendre l'initialisation de la base de données
 const { initializeDatabase } = require("./utils/dbInit");
+const BanExpirationHandler = require("./utils/banExpirationHandler");
+const SimpleModerationSystem = require("./utils/simpleModerationSystem");
 
 (async () => {
   try {
@@ -74,7 +76,9 @@ const { initializeDatabase } = require("./utils/dbInit");
     }
 
     // Préparer l'API REST avec le token du bot
-    const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
+    const rest = new REST({ version: "10" }).setToken(
+      process.env.DISCORD_TOKEN,
+    );
     const clientId = process.env.CLIENT_ID;
 
     // Récupérer les commandes actuellement enregistrées sur Discord
@@ -118,10 +122,18 @@ const { initializeDatabase } = require("./utils/dbInit");
         "⚠️\x1b[38;5;1m  Erreur lors de l'enregistrement des commandes: \x1b[0m",
         error,
       );
-    }
-
-    // Lancer le bot
+    } // Lancer le bot
     client.login(process.env.DISCORD_TOKEN);
+
+    // Initialiser les systèmes après la connexion
+    client.once("ready", () => {
+      // Gestionnaire de bans expirés
+      const banExpirationHandler = new BanExpirationHandler(client);
+      banExpirationHandler.start();
+      // Système de modération simplifié
+      const simpleModerationSystem = new SimpleModerationSystem(client);
+      client.simpleModerationSystem = simpleModerationSystem;
+    });
   } catch (err) {
     console.error(
       "⚠️\x1b[38;5;1m  Erreur lors de l'initialisation de la base de données ou du bot:",

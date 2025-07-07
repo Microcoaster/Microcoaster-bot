@@ -29,10 +29,7 @@
   },
   "warranty": {
     "default_duration_months": 12,
-    "reminder_days": [
-      30,
-      7
-    ],
+    "reminder_days": [30, 7],
     "max_activation_attempts": 3,
     "cleanup_interval_hours": 24
   },
