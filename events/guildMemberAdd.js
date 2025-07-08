@@ -7,6 +7,7 @@
 
 const { EmbedBuilder } = require("discord.js");
 const WarrantyDAO = require("../dao/warrantyDAO");
+const ConfigManager = require("../utils/configManager");
 
 module.exports = {
   name: "guildMemberAdd",
@@ -28,7 +29,8 @@ module.exports = {
       }
 
       // Vérifier si c'est le serveur configuré
-      const config = require("../config/config.json");
+      const configManager = ConfigManager.getInstance();
+      const config = configManager.getConfig();
       if (guild.id !== config.guild_id) {
         console.log(
           `⚠️  Événement ignoré - ${user.tag} a rejoint un serveur non configuré: ${guild.name} (${guild.id})`,
@@ -47,17 +49,24 @@ module.exports = {
         if (memberRole && !member.roles.cache.has(memberRoleId)) {
           try {
             await member.roles.add(memberRole);
-            console.log(`   ↳ Rôle membre assigné automatiquement à ${user.tag}`);
-            
+            console.log(
+              `   ↳ Rôle membre assigné automatiquement à ${user.tag}`,
+            );
+
             // Logger l'assignation du rôle membre
             const roleLogsChannelId = config.channels.role_logs_channel_id;
-            if (roleLogsChannelId && roleLogsChannelId !== "YOUR_ROLE_LOGS_CHANNEL_ID") {
+            if (
+              roleLogsChannelId &&
+              roleLogsChannelId !== "YOUR_ROLE_LOGS_CHANNEL_ID"
+            ) {
               const logChannel = guild.channels.cache.get(roleLogsChannelId);
               if (logChannel) {
                 const logEmbed = new EmbedBuilder()
                   .setColor("#0099ff")
                   .setTitle("🎭 Automatic Member Role Assignment")
-                  .setDescription(`Member role automatically assigned to new user`)
+                  .setDescription(
+                    `Member role automatically assigned to new user`,
+                  )
                   .addFields(
                     {
                       name: "👤 User",
@@ -73,7 +82,7 @@ module.exports = {
                       name: "🤖 Triggered By",
                       value: "Automatic on join",
                       inline: true,
-                    }
+                    },
                   )
                   .setTimestamp();
 
@@ -81,7 +90,10 @@ module.exports = {
               }
             }
           } catch (error) {
-            console.error(`Erreur lors de l'assignation du rôle membre à ${user.tag}:`, error);
+            console.error(
+              `Erreur lors de l'assignation du rôle membre à ${user.tag}:`,
+              error,
+            );
           }
         }
       }
@@ -90,7 +102,9 @@ module.exports = {
       const warranty = await warrantyDAO.getUserWarranty(user.id);
 
       if (!warranty) {
-        console.log(`   ↳ Aucune garantie trouvée pour ${user.tag} - rôle membre assigné uniquement`);
+        console.log(
+          `   ↳ Aucune garantie trouvée pour ${user.tag} - rôle membre assigné uniquement`,
+        );
         return;
       } // Récupérer la configuration des rôles
       const premiumRoleId = config.roles.premium_role_id;

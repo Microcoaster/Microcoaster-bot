@@ -32,7 +32,8 @@ class SimpleModerationSystem {
     if (!member) return false;
 
     try {
-      const config = require("../config/config.json");
+      const ConfigManager = require("./configManager");
+      const config = ConfigManager.getInstance().getConfig();
 
       // Rôles staff exemptés
       const staffRoles = [

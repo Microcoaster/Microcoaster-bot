@@ -29,7 +29,8 @@ module.exports = {
       }
 
       // Récupérer la configuration
-      const config = require("../config/config.json");
+      const ConfigManager = require("../utils/configManager");
+      const config = ConfigManager.getInstance().getConfig();
       const supportChannelId = config.support_channel_id;
       const supportChannelMention =
         supportChannelId && supportChannelId !== "YOUR_SUPPORT_CHANNEL_ID"

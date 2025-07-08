@@ -5,6 +5,7 @@ const {
   MessageFlags,
 } = require("discord.js");
 const WarrantyDAO = require("../dao/warrantyDAO");
+const ConfigManager = require("../utils/configManager");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -30,37 +31,49 @@ module.exports = {
     try {
       // Vérifier si l'interaction est encore valide avant de la différer
       if (!interaction.isRepliable()) {
-        console.error(`[activate-warranty] Interaction is no longer repliable for ${interaction.user.tag}`);
+        console.error(
+          `[activate-warranty] Interaction is no longer repliable for ${interaction.user.tag}`,
+        );
         return;
       }
 
       // Déferer immédiatement pour éviter l'expiration
       try {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-        console.log(`[activate-warranty] Successfully deferred reply for ${interaction.user.tag}`);
+        console.log(
+          `[activate-warranty] Successfully deferred reply for ${interaction.user.tag}`,
+        );
       } catch (deferError) {
         console.error(`[activate-warranty] Failed to defer reply:`, deferError);
         // Si on ne peut pas différer, essayer de répondre directement
         if (!interaction.replied) {
           try {
             await interaction.reply({
-              content: "❌ An error occurred while processing your request. Please try again.",
+              content:
+                "❌ An error occurred while processing your request. Please try again.",
               flags: MessageFlags.Ephemeral,
             });
           } catch (replyError) {
-            console.error(`[activate-warranty] Failed to reply directly:`, replyError);
+            console.error(
+              `[activate-warranty] Failed to reply directly:`,
+              replyError,
+            );
           }
         }
         return;
       }
 
-      console.log(`[activate-warranty] Command started by ${interaction.user.tag} (${interaction.user.id})`);
+      console.log(
+        `[activate-warranty] Command started by ${interaction.user.tag} (${interaction.user.id})`,
+      );
 
       // Vérification des permissions admin
       if (
         !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
       ) {
-        console.log(`[activate-warranty] Permission denied for ${interaction.user.tag}`);
+        console.log(
+          `[activate-warranty] Permission denied for ${interaction.user.tag}`,
+        );
         return await interaction.editReply({
           content: "❌ You need Administrator permissions to use this command.",
         });
@@ -70,7 +83,9 @@ module.exports = {
       const targetUser = interaction.options.getUser("user");
       const adminId = interaction.user.id;
 
-      console.log(`[activate-warranty] Processing code: ${code}, targetUser: ${targetUser?.tag || 'None'}`);
+      console.log(
+        `[activate-warranty] Processing code: ${code}, targetUser: ${targetUser?.tag || "None"}`,
+      );
 
       const warrantyDAO = new WarrantyDAO();
 
@@ -82,11 +97,15 @@ module.exports = {
           adminId,
           targetUser ? targetUser.id : null,
         );
-        console.log(`[activate-warranty] ActivateWarranty completed successfully`);
+        console.log(
+          `[activate-warranty] ActivateWarranty completed successfully`,
+        );
 
         // Si le code a été activé sans utilisateur
         if (result.codeActivatedWithoutUser) {
-          console.log(`[activate-warranty] Code activated without user assignment`);
+          console.log(
+            `[activate-warranty] Code activated without user assignment`,
+          );
           const noUserEmbed = new EmbedBuilder()
             .setColor("#00ff00")
             .setTitle("✅ Code Activated Without User Assignment")
@@ -130,7 +149,8 @@ module.exports = {
 
         if (user) {
           // Récupérer la configuration des rôles
-          const config = require("../config/config.json");
+          const configManager = ConfigManager.getInstance();
+          const config = configManager.getConfig();
           const warrantyRoleId = config.roles.warranty_role_id;
           const premiumRoleId = config.roles.premium_role_id;
 
@@ -162,12 +182,15 @@ module.exports = {
           // Logger dans le canal de logs de rôles
           const roleLogsChannelId = config.channels.role_logs_channel_id;
           if (roleLogsChannelId && rolesAssigned.length > 0) {
-            const logChannel = interaction.guild.channels.cache.get(roleLogsChannelId);
+            const logChannel =
+              interaction.guild.channels.cache.get(roleLogsChannelId);
             if (logChannel) {
               const logEmbed = new EmbedBuilder()
                 .setColor("#00ff00")
                 .setTitle("🛡️ Warranty Activation - Roles Assigned")
-                .setDescription(`Roles assigned during admin warranty activation`)
+                .setDescription(
+                  `Roles assigned during admin warranty activation`,
+                )
                 .addFields(
                   {
                     name: "👤 User",
@@ -193,14 +216,17 @@ module.exports = {
                     name: "⚡ Trigger",
                     value: "Admin warranty activation",
                     inline: false,
-                  }
+                  },
                 )
                 .setTimestamp();
 
               try {
                 await logChannel.send({ embeds: [logEmbed] });
               } catch (logError) {
-                console.error(`Error sending role log for warranty activation:`, logError);
+                console.error(
+                  `Error sending role log for warranty activation:`,
+                  logError,
+                );
               }
             }
           }
@@ -354,7 +380,9 @@ module.exports = {
             flags: MessageFlags.Ephemeral,
           });
         } else {
-          console.log(`[activate-warranty] Interaction already handled, cannot send error message`);
+          console.log(
+            `[activate-warranty] Interaction already handled, cannot send error message`,
+          );
         }
       } catch (replyError) {
         console.error("Could not send error message to user:", replyError);

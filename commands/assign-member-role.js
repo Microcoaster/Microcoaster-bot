@@ -4,6 +4,7 @@ const {
   PermissionFlagsBits,
   MessageFlags,
 } = require("discord.js");
+const ConfigManager = require("../utils/configManager");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -23,8 +24,8 @@ module.exports = {
           content: "❌ You need Administrator permissions to use this command.",
         });
       }
-
-      const config = require("../config/config.json");
+      const configManager = ConfigManager.getInstance();
+      const config = configManager.getConfig();
       const memberRoleId = config.roles.member_role_id;
 
       if (!memberRoleId || memberRoleId === "YOUR_MEMBER_ROLE_ID") {
@@ -32,7 +33,7 @@ module.exports = {
           .setColor("#ff0000")
           .setTitle("❌ Member Role Not Configured")
           .setDescription(
-            "The member role is not configured. Please use `/config` to set up the member role first."
+            "The member role is not configured. Please use `/config` to set up the member role first.",
           )
           .setTimestamp();
 
@@ -45,7 +46,7 @@ module.exports = {
           .setColor("#ff0000")
           .setTitle("❌ Member Role Not Found")
           .setDescription(
-            `The member role with ID \`${memberRoleId}\` was not found on this server.`
+            `The member role with ID \`${memberRoleId}\` was not found on this server.`,
           )
           .setTimestamp();
 
@@ -80,7 +81,10 @@ module.exports = {
             successCount++;
           }
         } catch (error) {
-          console.error(`Error assigning member role to ${member.user.tag}:`, error);
+          console.error(
+            `Error assigning member role to ${member.user.tag}:`,
+            error,
+          );
           errorCount++;
         }
       }
@@ -88,11 +92,13 @@ module.exports = {
       const resultEmbed = new EmbedBuilder()
         .setColor(errorCount > 0 ? "#ffaa00" : "#00ff00")
         .setTitle("✅ Member Role Assignment Complete")
-        .setDescription(`The member role has been processed for all server members.`)
+        .setDescription(
+          `The member role has been processed for all server members.`,
+        )
         .addFields(
           {
             name: "📊 Results",
-            value: 
+            value:
               `**Role Assigned:** ${successCount} members\n` +
               `**Already Had Role:** ${alreadyHadRole} members\n` +
               `**Errors:** ${errorCount} members\n` +
@@ -103,7 +109,7 @@ module.exports = {
             name: "🎭 Role Information",
             value: `**Role:** ${memberRole.name}\n**Role ID:** \`${memberRoleId}\``,
             inline: false,
-          }
+          },
         )
         .setFooter({ text: "MicroCoaster™ Role Management System" })
         .setTimestamp();
@@ -112,13 +118,19 @@ module.exports = {
 
       // Logger dans le canal de logs si configuré
       const roleLogsChannelId = config.channels.role_logs_channel_id;
-      if (roleLogsChannelId && roleLogsChannelId !== "YOUR_ROLE_LOGS_CHANNEL_ID") {
-        const logChannel = interaction.guild.channels.cache.get(roleLogsChannelId);
+      if (
+        roleLogsChannelId &&
+        roleLogsChannelId !== "YOUR_ROLE_LOGS_CHANNEL_ID"
+      ) {
+        const logChannel =
+          interaction.guild.channels.cache.get(roleLogsChannelId);
         if (logChannel) {
           const logEmbed = new EmbedBuilder()
             .setColor("#0099ff")
             .setTitle("🎭 Bulk Member Role Assignment")
-            .setDescription(`Member role has been assigned to all server members.`)
+            .setDescription(
+              `Member role has been assigned to all server members.`,
+            )
             .addFields(
               {
                 name: "👤 Executed By",
@@ -132,19 +144,18 @@ module.exports = {
               },
               {
                 name: "📊 Results",
-                value: 
+                value:
                   `Assigned: ${successCount}\n` +
                   `Already had: ${alreadyHadRole}\n` +
                   `Errors: ${errorCount}`,
                 inline: true,
-              }
+              },
             )
             .setTimestamp();
 
           await logChannel.send({ embeds: [logEmbed] });
         }
       }
-
     } catch (error) {
       console.error("Error in assign-member-role command:", error);
 
@@ -152,7 +163,7 @@ module.exports = {
         .setColor("#ff0000")
         .setTitle("❌ System Error")
         .setDescription(
-          "A system error occurred while assigning the member role."
+          "A system error occurred while assigning the member role.",
         )
         .setFooter({ text: "Please contact the developer if this persists." })
         .setTimestamp();

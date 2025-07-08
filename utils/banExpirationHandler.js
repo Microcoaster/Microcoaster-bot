@@ -67,7 +67,8 @@ class BanExpirationHandler {
    */
   async processExpiredBan(banRecord) {
     try {
-      const config = require("../config/config.json");
+      const ConfigManager = require("./configManager");
+      const config = ConfigManager.getInstance().getConfig();
       const guild = this.client.guilds.cache.first(); // Supposons qu'il n'y a qu'un serveur
 
       if (!guild) {

@@ -9,6 +9,7 @@ const {
   StringSelectMenuBuilder,
 } = require("discord.js");
 const TicketDAO = require("../dao/ticketDAO");
+const ConfigManager = require("../utils/configManager");
 const ticketDAO = new TicketDAO();
 
 // Configuration des niveaux de priorité
@@ -57,7 +58,8 @@ module.exports = {
       }
 
       // Vérifier si l'utilisateur a les permissions staff
-      const config = require("../config/config.json");
+      const configManager = ConfigManager.getInstance();
+      const config = configManager.getConfig();
       const staffRoles = [
         config.roles.support_team_role_id,
         config.roles.technical_team_role_id,

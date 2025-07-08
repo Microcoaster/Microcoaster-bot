@@ -5,6 +5,7 @@ const {
   MessageFlags,
 } = require("discord.js");
 const WarrantyDAO = require("../dao/warrantyDAO");
+const ConfigManager = require("../utils/configManager");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -110,7 +111,8 @@ module.exports = {
             statusMessages.push(`✅ Code assigned to ${assignToUser.tag}`);
 
             // Donner le rôle Premium
-            const config = require("../config/config.json");
+            const configManager = ConfigManager.getInstance();
+            const config = configManager.getConfig();
             const premiumRoleId = config.roles.premium_role_id;
             const rolesAssigned = [];
 
@@ -162,12 +164,15 @@ module.exports = {
                 // Logger dans le canal de logs de rôles
                 const roleLogsChannelId = config.channels.role_logs_channel_id;
                 if (roleLogsChannelId && rolesAssigned.length > 0) {
-                  const logChannel = interaction.guild.channels.cache.get(roleLogsChannelId);
+                  const logChannel =
+                    interaction.guild.channels.cache.get(roleLogsChannelId);
                   if (logChannel) {
                     const logEmbed = new EmbedBuilder()
                       .setColor("#00ff00")
                       .setTitle("🔧 Code Creation - Roles Assigned")
-                      .setDescription(`Roles assigned during code creation and assignment`)
+                      .setDescription(
+                        `Roles assigned during code creation and assignment`,
+                      )
                       .addFields(
                         {
                           name: "👤 User",
@@ -193,14 +198,17 @@ module.exports = {
                           name: "⚡ Trigger",
                           value: "Admin code creation",
                           inline: false,
-                        }
+                        },
                       )
                       .setTimestamp();
 
                     try {
                       await logChannel.send({ embeds: [logEmbed] });
                     } catch (logError) {
-                      console.error(`Error sending role log for code creation:`, logError);
+                      console.error(
+                        `Error sending role log for code creation:`,
+                        logError,
+                      );
                     }
                   }
                 }

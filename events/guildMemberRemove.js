@@ -20,7 +20,8 @@ module.exports = {
       const guild = member.guild;
 
       // Vérifier si c'est le serveur configuré
-      const config = require("../config/config.json");
+      const ConfigManager = require("../utils/configManager");
+      const config = ConfigManager.getInstance().getConfig();
       if (guild.id !== config.guild_id) {
         console.log(
           `⚠️  Événement ignoré - ${user.tag} a quitté un serveur non configuré: ${guild.name} (${guild.id})`,

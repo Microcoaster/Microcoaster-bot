@@ -44,7 +44,8 @@ module.exports = {
     );
 
     // Optionnel : définir le statut du bot depuis la configuration
-    const config = require("../config/config.json");
+    const ConfigManager = require("../utils/configManager");
+    const config = ConfigManager.getInstance().getConfig();
     const activityType = config.bot.activity_type || "WATCHING";
     const status = config.bot.status || "MicroCoaster™ Support | /help";
 
@@ -92,7 +93,8 @@ module.exports = {
  */
 async function verifyRoleIntegrity(client) {
   try {
-    const config = require("../config/config.json");
+    const ConfigManager = require("../utils/configManager");
+    const config = ConfigManager.getInstance().getConfig();
     const targetGuildId = config.guild_id;
     const guild = client.guilds.cache.get(targetGuildId);
 
@@ -216,7 +218,8 @@ async function verifyRoleIntegrity(client) {
  */
 async function verifyTicketIntegrity(client) {
   try {
-    const config = require("../config/config.json");
+    const ConfigManager = require("../utils/configManager");
+    const config = ConfigManager.getInstance().getConfig();
     const targetGuildId = config.guild_id;
     const guild = client.guilds.cache.get(targetGuildId);
 
@@ -321,7 +324,8 @@ function setupCronJobs(client) {
  */
 async function checkWarrantyReminders(client) {
   try {
-    const config = require("../config/config.json");
+    const ConfigManager = require("../utils/configManager");
+    const config = ConfigManager.getInstance().getConfig();
     const targetGuildId = config.guild_id;
 
     console.log(
@@ -433,7 +437,8 @@ async function checkWarrantyReminders(client) {
  */
 async function cleanupExpiredData(client) {
   try {
-    const config = require("../config/config.json");
+    const ConfigManager = require("../utils/configManager");
+    const config = ConfigManager.getInstance().getConfig();
     const targetGuildId = config.guild_id;
     const guild = client.guilds.cache.get(targetGuildId);
 

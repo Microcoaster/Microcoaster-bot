@@ -7,8 +7,7 @@ const {
   TextInputStyle,
   MessageFlags,
 } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
+const ConfigManager = require("../utils/configManager");
 
 // Mapping des configurations avec leurs descriptions et validations
 const configCategories = {
@@ -198,8 +197,8 @@ module.exports = {
     }
 
     try {
-      const configPath = path.join(__dirname, "../config/config.json");
-      const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+      const configManager = ConfigManager.getInstance();
+      const config = configManager.getConfig();
 
       // Check if we need to show a modal (don't defer in that case)
       let needsModal = false;
@@ -237,19 +236,35 @@ module.exports = {
         // Ajouter les champs actuels
         for (const [key, field] of Object.entries(categoryConfig.fields)) {
           let currentValue = "Not set";
-          
+
           // Accéder à la bonne section de la configuration
           if (category === "roles" && config.roles && config.roles[key]) {
             currentValue = config.roles[key];
-          } else if (category === "channels" && config.channels && config.channels[key]) {
+          } else if (
+            category === "channels" &&
+            config.channels &&
+            config.channels[key]
+          ) {
             currentValue = config.channels[key];
-          } else if (category === "categories" && config.categories && config.categories[key]) {
+          } else if (
+            category === "categories" &&
+            config.categories &&
+            config.categories[key]
+          ) {
             currentValue = config.categories[key];
           } else if (category === "bot" && config.bot && config.bot[key]) {
             currentValue = config.bot[key];
-          } else if (category === "warranty" && config.warranty && config.warranty[key]) {
+          } else if (
+            category === "warranty" &&
+            config.warranty &&
+            config.warranty[key]
+          ) {
             currentValue = config.warranty[key];
-          } else if (category === "tickets" && config.tickets && config.tickets[key]) {
+          } else if (
+            category === "tickets" &&
+            config.tickets &&
+            config.tickets[key]
+          ) {
             currentValue = config.tickets[key];
           }
 
@@ -424,15 +439,31 @@ module.exports = {
         let currentValue = "Not set";
         if (category === "roles" && config.roles && config.roles[fieldKey]) {
           currentValue = config.roles[fieldKey];
-        } else if (category === "channels" && config.channels && config.channels[fieldKey]) {
+        } else if (
+          category === "channels" &&
+          config.channels &&
+          config.channels[fieldKey]
+        ) {
           currentValue = config.channels[fieldKey];
-        } else if (category === "categories" && config.categories && config.categories[fieldKey]) {
+        } else if (
+          category === "categories" &&
+          config.categories &&
+          config.categories[fieldKey]
+        ) {
           currentValue = config.categories[fieldKey];
         } else if (category === "bot" && config.bot && config.bot[fieldKey]) {
           currentValue = config.bot[fieldKey];
-        } else if (category === "warranty" && config.warranty && config.warranty[fieldKey]) {
+        } else if (
+          category === "warranty" &&
+          config.warranty &&
+          config.warranty[fieldKey]
+        ) {
           currentValue = config.warranty[fieldKey];
-        } else if (category === "tickets" && config.tickets && config.tickets[fieldKey]) {
+        } else if (
+          category === "tickets" &&
+          config.tickets &&
+          config.tickets[fieldKey]
+        ) {
           currentValue = config.tickets[fieldKey];
         }
 

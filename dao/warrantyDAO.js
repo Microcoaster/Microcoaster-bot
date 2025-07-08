@@ -214,7 +214,7 @@ class WarrantyDAO {
       );
 
       console.log(
-        `\x1b[38;5;2m✅ Garantie activée avec succès - Code: ${code}, Utilisateur: ${targetUserId || 'Aucun'}, Admin: ${adminId}\x1b[0m`,
+        `\x1b[38;5;2m✅ Garantie activée avec succès - Code: ${code}, Utilisateur: ${targetUserId || "Aucun"}, Admin: ${adminId}\x1b[0m`,
       );
 
       return {
@@ -263,7 +263,7 @@ class WarrantyDAO {
    */
   async extendWarranty(userId, days, adminId) {
     const connection = await this.getConnection();
-    
+
     if (userId) {
       // Cas 1: Code lié à un utilisateur - utiliser l'ancienne logique
       // Récupérer les infos actuelles
@@ -317,7 +317,7 @@ class WarrantyDAO {
    */
   async extendWarrantyByCode(code, days, adminId) {
     const connection = await this.getConnection();
-    
+
     // Récupérer les infos du code
     const [codeRows] = await connection.execute(
       "SELECT id, user_id, warranty_expires_at, warranty_activated FROM warranty_premium_codes WHERE code = ? AND warranty_activated = TRUE",
@@ -329,7 +329,7 @@ class WarrantyDAO {
     }
 
     const codeData = codeRows[0];
-    
+
     // Calculer la nouvelle date d'expiration
     const currentExpiration = new Date(codeData.warranty_expires_at);
     const newExpiration = new Date(

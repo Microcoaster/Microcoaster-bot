@@ -8,6 +8,7 @@ const {
   ButtonStyle,
 } = require("discord.js");
 const TicketDAO = require("../dao/ticketDAO");
+const ConfigManager = require("../utils/configManager");
 const ticketDAO = new TicketDAO();
 
 // Configuration des types de tickets
@@ -111,8 +112,9 @@ module.exports = {
       // Récupérer le prochain numéro de ticket (sans guild.id car la méthode ne le prend pas)
       const ticketNumber = await ticketDAO.getNextTicketNumber();
 
-      // Récupérer la configuration
-      const config = require("../config/config.json");
+      // Récupérer la configuration via le gestionnaire
+      const configManager = ConfigManager.getInstance();
+      const config = configManager.getConfig();
       const categoryId = config.categories[ticketConfig.configKey];
       let category = null;
 

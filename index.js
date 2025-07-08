@@ -128,6 +128,12 @@ const ConfigManager = require("./utils/configManager");
 
     // Initialiser les systèmes après la connexion
     client.once("ready", () => {
+      console.log("🤖 Bot connecté et prêt !");
+
+      // Initialiser le gestionnaire de configuration avec rechargement automatique
+      const configManager = ConfigManager.init(client);
+      client.configManager = configManager;
+
       // Gestionnaire de bans expirés
       const banExpirationHandler = new BanExpirationHandler(client);
       banExpirationHandler.start();

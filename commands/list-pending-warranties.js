@@ -55,7 +55,7 @@ module.exports = {
         .setTitle(`📋 Pending Warranty Codes (${pendingCodes.length} total)`)
         .setDescription(
           `Codes awaiting activation from the last ${days} days.\n` +
-          `Use \`/activate-warranty\` to activate them.`
+            `Use \`/activate-warranty\` to activate them.`,
         )
         .setTimestamp();
 
@@ -70,23 +70,23 @@ module.exports = {
         const linkedDate = code.linked_at ? new Date(code.linked_at) : null;
 
         let codeInfo = `**${code.code}**\n`;
-        
+
         if (code.product_info) {
           codeInfo += `Product: ${code.product_info}\n`;
         }
-        
+
         codeInfo += `Created: <t:${Math.floor(createdDate.getTime() / 1000)}:R>\n`;
-        
+
         if (linkedDate) {
           codeInfo += `Linked: <t:${Math.floor(linkedDate.getTime() / 1000)}:R>\n`;
         }
-        
+
         if (code.user_id) {
           codeInfo += `User: <@${code.user_id}>\n`;
         } else {
           codeInfo += `Status: Not linked to user\n`;
         }
-        
+
         codeInfo += `\n`;
 
         // Si ajouter ce code dépasserait la limite, créer un nouveau field
@@ -120,8 +120,8 @@ module.exports = {
       }
 
       // Ajouter des statistiques
-      const linkedCodes = displayCodes.filter(code => code.user_id);
-      const unlinkedCodes = displayCodes.filter(code => !code.user_id);
+      const linkedCodes = displayCodes.filter((code) => code.user_id);
+      const unlinkedCodes = displayCodes.filter((code) => !code.user_id);
 
       embed.addFields({
         name: "📊 Statistics",
@@ -151,7 +151,10 @@ module.exports = {
       if (interaction.deferred) {
         await interaction.editReply({ embeds: [errorEmbed] });
       } else {
-        await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+          embeds: [errorEmbed],
+          flags: MessageFlags.Ephemeral,
+        });
       }
     }
   },

@@ -49,7 +49,10 @@ module.exports = {
                 interaction.guild,
               );
             } catch (statsError) {
-              console.log("Stats logging failed (non-critical):", statsError.message);
+              console.log(
+                "Stats logging failed (non-critical):",
+                statsError.message,
+              );
             }
           });
         }

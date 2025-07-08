@@ -25,7 +25,7 @@ module.exports = {
           `\x1b[38;5;3m🗑️  Salon de ticket supprimé détecté: ${channel.name} (${channel.id})\x1b[0m`,
         );
         console.log(
-          `\x1b[38;5;3m📋  Ticket associé: ${ticket.ticket_id}\x1b[0m`,
+          `\x1b[38;5;3m📋 Ticket associé: ${ticket.ticket_id}\x1b[0m`,
         );
 
         // Supprimer le ticket de la base de données

@@ -1,26 +1,26 @@
 /**
  * Gestionnaire de configuration avec rechargement automatique
- * 
+ *
  * Ce module permet de recharger automatiquement la configuration
  * sans redémarrer le bot quand le fichier config.json est modifié.
  */
 
-const fs = require('fs');
-const path = require('path');
-const { EventEmitter } = require('events');
+const fs = require("fs");
+const path = require("path");
+const { EventEmitter } = require("events");
 
 class ConfigManager extends EventEmitter {
   constructor() {
     super();
-    this.configPath = path.join(__dirname, '../config/config.json');
+    this.configPath = path.join(__dirname, "../config/config.json");
     this.config = null;
     this.watcher = null;
     this.lastModified = null;
     this.debounceTimeout = null;
-    
+
     // Charger la configuration initiale
     this.loadConfig();
-    
+
     // Démarrer la surveillance du fichier
     this.startWatching();
   }
@@ -32,38 +32,38 @@ class ConfigManager extends EventEmitter {
     try {
       const stats = fs.statSync(this.configPath);
       const newModified = stats.mtime.getTime();
-      
+
       // Éviter de recharger si le fichier n'a pas changé
       if (this.lastModified === newModified && this.config) {
         return this.config;
       }
-      
-      const configData = fs.readFileSync(this.configPath, 'utf8');
+
+      const configData = fs.readFileSync(this.configPath, "utf8");
       const newConfig = JSON.parse(configData);
-      
+
       const oldConfig = this.config;
       this.config = newConfig;
       this.lastModified = newModified;
-      
+
       // Émettre un événement de changement si ce n'est pas le premier chargement
       if (oldConfig) {
-        console.log('🔄 Configuration rechargée automatiquement');
-        this.emit('configChanged', newConfig, oldConfig);
+        console.log("🔄 Configuration rechargée automatiquement");
+        this.emit("configChanged", newConfig, oldConfig);
       } else {
-        console.log('📋 Configuration chargée initialement');
-        this.emit('configLoaded', newConfig);
+        console.log("📋 Configuration chargée initialement");
+        this.emit("configLoaded", newConfig);
       }
-      
+
       return this.config;
     } catch (error) {
-      console.error('❌ Erreur lors du chargement de la configuration:', error);
-      
+      console.error("❌ Erreur lors du chargement de la configuration:", error);
+
       // Retourner la dernière configuration valide si disponible
       if (this.config) {
-        console.log('⚠️ Utilisation de la dernière configuration valide');
+        console.log("⚠️ Utilisation de la dernière configuration valide");
         return this.config;
       }
-      
+
       throw error;
     }
   }
@@ -78,21 +78,21 @@ class ConfigManager extends EventEmitter {
 
     try {
       this.watcher = fs.watch(this.configPath, (eventType) => {
-        if (eventType === 'change') {
+        if (eventType === "change") {
           // Debounce pour éviter les rechargements multiples
           if (this.debounceTimeout) {
             clearTimeout(this.debounceTimeout);
           }
-          
+
           this.debounceTimeout = setTimeout(() => {
             this.loadConfig();
           }, 100); // Attendre 100ms après le dernier changement
         }
       });
 
-      console.log('👁️ Surveillance de la configuration activée');
+      console.log("👁️  Surveillance de la configuration activée");
     } catch (error) {
-      console.error('❌ Erreur lors du démarrage de la surveillance:', error);
+      console.error("❌ Erreur lors du démarrage de la surveillance:", error);
     }
   }
 
@@ -103,9 +103,9 @@ class ConfigManager extends EventEmitter {
     if (this.watcher) {
       this.watcher.close();
       this.watcher = null;
-      console.log('👁️ Surveillance de la configuration arrêtée');
+      console.log("👁️  Surveillance de la configuration arrêtée");
     }
-    
+
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout);
       this.debounceTimeout = null;
@@ -124,17 +124,17 @@ class ConfigManager extends EventEmitter {
    */
   get(path) {
     const config = this.getConfig();
-    const keys = path.split('.');
+    const keys = path.split(".");
     let value = config;
-    
+
     for (const key of keys) {
-      if (value && typeof value === 'object' && key in value) {
+      if (value && typeof value === "object" && key in value) {
         value = value[key];
       } else {
         return undefined;
       }
     }
-    
+
     return value;
   }
 
@@ -173,12 +173,12 @@ module.exports = {
    */
   init(client) {
     const configManager = this.getInstance();
-    
+
     // Écouter les changements de configuration
-    configManager.on('configChanged', (newConfig, oldConfig) => {
+    configManager.on("configChanged", (newConfig, oldConfig) => {
       this.handleConfigChange(client, newConfig, oldConfig);
     });
-    
+
     return configManager;
   },
 
@@ -188,21 +188,22 @@ module.exports = {
   async handleConfigChange(client, newConfig, oldConfig) {
     try {
       // Mise à jour du statut du bot si nécessaire
-      if (oldConfig.bot?.status !== newConfig.bot?.status || 
-          oldConfig.bot?.activity_type !== newConfig.bot?.activity_type) {
-        
-        const status = newConfig.bot?.status || 'MicroCoaster™ Support';
-        const activityType = newConfig.bot?.activity_type || 'WATCHING';
-        
+      if (
+        oldConfig.bot?.status !== newConfig.bot?.status ||
+        oldConfig.bot?.activity_type !== newConfig.bot?.activity_type
+      ) {
+        const status = newConfig.bot?.status || "MicroCoaster™ Support";
+        const activityType = newConfig.bot?.activity_type || "WATCHING";
+
         await client.user.setActivity(status, { type: activityType });
         console.log(`🤖 Statut du bot mis à jour: ${activityType} ${status}`);
       }
 
       // Autres mises à jour en temps réel peuvent être ajoutées ici
-      
-      console.log('✅ Configuration appliquée en temps réel');
+
+      console.log("✅ Configuration appliquée en temps réel");
     } catch (error) {
-      console.error('❌ Erreur lors de l\'application des changements:', error);
+      console.error("❌ Erreur lors de l'application des changements:", error);
     }
   },
 
@@ -218,5 +219,5 @@ module.exports = {
    */
   get(path) {
     return this.getInstance().get(path);
-  }
+  },
 };

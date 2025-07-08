@@ -50,7 +50,8 @@ module.exports = {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       // Vérifier les permissions
-      const config = require("../config/config.json");
+      const ConfigManager = require("../utils/configManager");
+      const config = ConfigManager.getInstance().getConfig();
       const staffRoles = [
         config.roles.admin_role_id,
         config.roles.support_team_role_id,
@@ -205,13 +206,16 @@ module.exports = {
           setImmediate(async () => {
             try {
               await interaction.client.statsLogger.logModerationAction(
-                'BAN',
+                "BAN",
                 targetUser,
                 moderator,
-                `${reason} (Duration: ${durationDisplay})`
+                `${reason} (Duration: ${durationDisplay})`,
               );
             } catch (statsError) {
-              console.log("Stats logging failed (non-critical):", statsError.message);
+              console.log(
+                "Stats logging failed (non-critical):",
+                statsError.message,
+              );
             }
           });
         }

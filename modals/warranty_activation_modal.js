@@ -1,5 +1,6 @@
 const { EmbedBuilder, MessageFlags } = require("discord.js");
 const WarrantyDAO = require("../dao/warrantyDAO");
+const ConfigManager = require("../utils/configManager");
 const warrantyDAO = new WarrantyDAO();
 
 module.exports = {
@@ -95,7 +96,8 @@ module.exports = {
       );
 
       // Récupérer la configuration des rôles
-      const config = require("../config/config.json");
+      const configManager = ConfigManager.getInstance();
+      const config = configManager.getConfig();
       const premiumRoleId = config.roles.premium_role_id;
       const warrantyRoleId = config.roles.warranty_role_id;
 
@@ -131,7 +133,7 @@ module.exports = {
             }
           }
         }
-      }      // Mettre à jour le statut des rôles dans la base de données
+      } // Mettre à jour le statut des rôles dans la base de données
       await warrantyDAO.updateUserRoleStatus({
         user_id: user.id,
         has_premium: true,
@@ -153,7 +155,9 @@ module.exports = {
             const logEmbed = new EmbedBuilder()
               .setColor("#00ff00")
               .setTitle("🎫 Code Activation - Roles Assigned")
-              .setDescription(`Roles automatically assigned during code activation`)
+              .setDescription(
+                `Roles automatically assigned during code activation`,
+              )
               .addFields(
                 {
                   name: "👤 User",
@@ -174,14 +178,17 @@ module.exports = {
                   name: "⚡ Trigger",
                   value: "User code activation",
                   inline: false,
-                }
+                },
               )
               .setTimestamp();
 
             try {
               await logChannel.send({ embeds: [logEmbed] });
             } catch (logError) {
-              console.error(`Error sending role log for ${user.tag}:`, logError);
+              console.error(
+                `Error sending role log for ${user.tag}:`,
+                logError,
+              );
             }
           }
         }

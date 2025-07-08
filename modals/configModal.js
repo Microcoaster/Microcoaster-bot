@@ -1,6 +1,7 @@
 const { EmbedBuilder, MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
+const ConfigManager = require("../utils/configManager");
 
 module.exports = {
   execute: async (interaction) => {
@@ -13,14 +14,17 @@ module.exports = {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       // Analyser l'ID du modal
-      const [, , category, fieldKey] = interaction.customId.split("_");
+      const parts = interaction.customId.split("_");
+      const category = parts[2]; // config_modal_[category]_...
+      const fieldKey = parts.slice(3).join("_"); // Rejoindre le reste pour les champs avec des underscores
       const newValue = interaction.fields
         .getTextInputValue("config_value")
         .trim();
 
-      // Charger la configuration actuelle
+      // Charger la configuration actuelle via le gestionnaire
+      const configManager = ConfigManager.getInstance();
+      const config = configManager.getConfig();
       const configPath = path.join(__dirname, "../config/config.json");
-      const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
       // Valider et formater la nouvelle valeur
       const validationResult = await validateConfigValue(
@@ -48,6 +52,9 @@ module.exports = {
 
       // Sauvegarder le fichier de configuration
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+      // Recharger la configuration dans le gestionnaire
+      configManager.reload();
 
       // Appliquer les changements en temps réel si nécessaire
       await applyConfigChanges(
@@ -113,7 +120,10 @@ module.exports = {
       if (interaction.deferred) {
         await interaction.editReply({ embeds: [errorEmbed] });
       } else {
-        await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+          embeds: [errorEmbed],
+          flags: MessageFlags.Ephemeral,
+        });
       }
     }
   },
@@ -276,20 +286,20 @@ async function validateConfigValue(interaction, fieldKey, value) {
 async function applyConfigChanges(client, fieldKey, newValue) {
   try {
     switch (fieldKey) {
+      case "status":
       case "bot_status":
         await client.user.setActivity(newValue, { type: "WATCHING" });
+        console.log(`🤖 Statut du bot mis à jour: ${newValue}`);
         break;
 
+      case "activity_type":
       case "bot_activity_type": {
-        const config = JSON.parse(
-          fs.readFileSync(
-            path.join(__dirname, "../config/config.json"),
-            "utf8",
-          ),
-        );
-        await client.user.setActivity(
-          config.bot_status || "MicroCoaster™ Support",
-          { type: newValue },
+        const configManager = ConfigManager.getInstance();
+        const config = configManager.getConfig();
+        const status = config.bot?.status || "MicroCoaster™ Support";
+        await client.user.setActivity(status, { type: newValue });
+        console.log(
+          `🤖 Type d'activité du bot mis à jour: ${newValue} ${status}`,
         );
         break;
       }

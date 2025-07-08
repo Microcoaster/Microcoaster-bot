@@ -49,7 +49,9 @@ module.exports = {
         const embed = new EmbedBuilder()
           .setColor("#ff0000")
           .setTitle("❌ Code Not Found")
-          .setDescription(`Warranty code \`${code}\` was not found in the database.`)
+          .setDescription(
+            `Warranty code \`${code}\` was not found in the database.`,
+          )
           .setTimestamp();
 
         return await interaction.editReply({ embeds: [embed] });
@@ -70,15 +72,21 @@ module.exports = {
 
       // Étendre la garantie (même si pas lié à un utilisateur)
       const newExpiration = await warrantyDAO.extendWarrantyByCode(
-        code, 
-        daysToAdd, 
-        interaction.user.id
+        code,
+        daysToAdd,
+        interaction.user.id,
       );
 
       // Récupérer les informations de l'utilisateur pour l'affichage (si lié)
-      const targetUser = codeData.user_id ? await interaction.client.users.fetch(codeData.user_id).catch(() => null) : null;
-      const userDisplay = codeData.user_id 
-        ? (targetUser ? `${targetUser.tag} (<@${codeData.user_id}>)` : `User ID: ${codeData.user_id}`)
+      const targetUser = codeData.user_id
+        ? await interaction.client.users
+            .fetch(codeData.user_id)
+            .catch(() => null)
+        : null;
+      const userDisplay = codeData.user_id
+        ? targetUser
+          ? `${targetUser.tag} (<@${codeData.user_id}>)`
+          : `User ID: ${codeData.user_id}`
         : "Not linked to any user";
 
       // Créer l'embed de confirmation
@@ -119,7 +127,8 @@ module.exports = {
       if (!codeData.user_id) {
         successEmbed.addFields({
           name: "📝 Note",
-          value: "This code is not linked to any user. The extended warranty will be applied when the code is claimed.",
+          value:
+            "This code is not linked to any user. The extended warranty will be applied when the code is claimed.",
           inline: false,
         });
       }
@@ -179,7 +188,10 @@ module.exports = {
       if (interaction.deferred) {
         await interaction.editReply({ embeds: [errorEmbed] });
       } else {
-        await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+          embeds: [errorEmbed],
+          flags: MessageFlags.Ephemeral,
+        });
       }
     }
   },

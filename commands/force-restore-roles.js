@@ -13,7 +13,9 @@ module.exports = {
     .addUserOption((option) =>
       option
         .setName("user")
-        .setDescription("The user whose roles to restore (leave empty for all users)")
+        .setDescription(
+          "The user whose roles to restore (leave empty for all users)",
+        )
         .setRequired(false),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
@@ -46,7 +48,10 @@ module.exports = {
       if (interaction.deferred) {
         await interaction.editReply({ embeds: [errorEmbed] });
       } else {
-        await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+          embeds: [errorEmbed],
+          flags: MessageFlags.Ephemeral,
+        });
       }
     }
   },
@@ -95,13 +100,20 @@ module.exports = {
       return await interaction.editReply({ embeds: [embed] });
     }
 
-    const result = await this.restoreUserRoles(interaction, warrantyDAO, member, warranty);
+    const result = await this.restoreUserRoles(
+      interaction,
+      warrantyDAO,
+      member,
+      warranty,
+    );
     return await interaction.editReply({ embeds: [result.embed] });
   },
 
   async processAllUsers(interaction, warrantyDAO) {
     // Récupérer toutes les garanties actives
-    const activeWarranties = await warrantyDAO.getActiveWarranties(interaction.guild.id);
+    const activeWarranties = await warrantyDAO.getActiveWarranties(
+      interaction.guild.id,
+    );
 
     if (activeWarranties.length === 0) {
       const embed = new EmbedBuilder()
@@ -130,11 +142,19 @@ module.exports = {
         }
 
         processedCount++;
-        const result = await this.restoreUserRoles(interaction, warrantyDAO, member, warranty, true);
-        
+        const result = await this.restoreUserRoles(
+          interaction,
+          warrantyDAO,
+          member,
+          warranty,
+          true,
+        );
+
         if (result.restored) {
           restoredCount++;
-          results.push(`✅ ${member.user.tag}: ${result.rolesRestored.join(", ")}`);
+          results.push(
+            `✅ ${member.user.tag}: ${result.rolesRestored.join(", ")}`,
+          );
         } else {
           results.push(`ℹ️ ${member.user.tag}: Already has all roles`);
         }
@@ -148,22 +168,23 @@ module.exports = {
       .setColor("#00ff00")
       .setTitle("🔄 Bulk Role Restoration Complete")
       .setDescription(
-        `Processed ${processedCount} users with active warranties.`
+        `Processed ${processedCount} users with active warranties.`,
       )
-      .addFields(
-        {
-          name: "📊 Summary",
-          value: `**Roles Restored:** ${restoredCount}\n**Already Up-to-Date:** ${processedCount - restoredCount}\n**Errors:** ${errorCount}`,
-          inline: false,
-        }
-      )
+      .addFields({
+        name: "📊 Summary",
+        value: `**Roles Restored:** ${restoredCount}\n**Already Up-to-Date:** ${processedCount - restoredCount}\n**Errors:** ${errorCount}`,
+        inline: false,
+      })
       .setTimestamp();
 
     if (results.length > 0) {
-      const resultText = results.slice(0, 10).join('\n');
+      const resultText = results.slice(0, 10).join("\n");
       embed.addFields({
         name: "📋 Results (showing first 10)",
-        value: resultText.length > 1024 ? resultText.substring(0, 1021) + "..." : resultText,
+        value:
+          resultText.length > 1024
+            ? resultText.substring(0, 1021) + "..."
+            : resultText,
         inline: false,
       });
     }
@@ -171,9 +192,16 @@ module.exports = {
     return await interaction.editReply({ embeds: [embed] });
   },
 
-  async restoreUserRoles(interaction, warrantyDAO, member, warranty, isBulk = false) {
+  async restoreUserRoles(
+    interaction,
+    warrantyDAO,
+    member,
+    warranty,
+    isBulk = false,
+  ) {
     // Récupérer les rôles de garantie depuis la configuration
-    const config = require("../config/config.json");
+    const ConfigManager = require("../utils/configManager");
+    const config = ConfigManager.getInstance().getConfig();
     const warrantyRoleId = config.roles.warranty_role_id;
     const premiumRoleId = config.roles.premium_role_id;
 
@@ -202,7 +230,9 @@ module.exports = {
       rolesRestored.push(premiumRole.name);
     }
 
-    const expirationDate = new Date(warranty.warranty_expires_at || warranty.expiration_date);
+    const expirationDate = new Date(
+      warranty.warranty_expires_at || warranty.expiration_date,
+    );
 
     if (rolesToAdd.length === 0) {
       const embed = new EmbedBuilder()
@@ -229,7 +259,10 @@ module.exports = {
     await member.roles.add(rolesToAdd);
 
     // Mettre à jour le statut des rôles dans la base de données
-    await warrantyDAO.updateRoleStatus(warranty.warranty_id || warranty.id, true);
+    await warrantyDAO.updateRoleStatus(
+      warranty.warranty_id || warranty.id,
+      true,
+    );
 
     // Logger l'action
     await warrantyDAO.logWarrantyAction({
@@ -304,5 +337,5 @@ module.exports = {
     }
 
     return { embed: successEmbed, restored: true, rolesRestored };
-  }
+  },
 };
