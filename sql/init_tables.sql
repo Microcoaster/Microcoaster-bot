@@ -3,16 +3,16 @@
 -- Tables d'exemple pour template Discord Bot
 
 -- Supprimer les tables dans le bon ordre (contraintes de clés étrangères)
-DROP TABLE IF EXISTS ticket_transcriptions;
-DROP TABLE IF EXISTS ticket_counter;
-DROP TABLE IF EXISTS warranty_activation_logs;
-DROP TABLE IF EXISTS role_restoration_logs;
-DROP TABLE IF EXISTS user_bans;
-DROP TABLE IF EXISTS user_status;
-DROP TABLE IF EXISTS moderation_logs;
-DROP TABLE IF EXISTS support_tickets;
-DROP TABLE IF EXISTS user_roles_backup;
-DROP TABLE IF EXISTS warranty_premium_codes;
+-- DROP TABLE IF EXISTS ticket_transcriptions;
+-- DROP TABLE IF EXISTS ticket_counter;
+-- DROP TABLE IF EXISTS warranty_activation_logs;
+-- DROP TABLE IF EXISTS role_restoration_logs;
+-- DROP TABLE IF EXISTS user_bans;
+-- DROP TABLE IF EXISTS user_status;
+-- DROP TABLE IF EXISTS moderation_logs;
+-- DROP TABLE IF EXISTS support_tickets;
+-- DROP TABLE IF EXISTS user_roles_backup;
+-- DROP TABLE IF EXISTS warranty_premium_codes;
 
 -- Table principale des codes warranty/premium
 CREATE TABLE IF NOT EXISTS warranty_premium_codes (
@@ -125,20 +125,6 @@ CREATE TABLE IF NOT EXISTS ticket_transcriptions (
 
 -- Initialiser le compteur de tickets
 INSERT IGNORE INTO ticket_counter (id, last_ticket_number) VALUES (1, 0);
-
--- 🧪 CODES DE TEST POUR LE DÉVELOPPEMENT 🧪
--- Insertion des codes de test (ils seront recréés à chaque lancement)
-INSERT INTO warranty_premium_codes (code, product_info, created_at) VALUES 
-('1234567890', 'Code de test 1 - MicroCoaster Premium', NOW()),
-('0987654321', 'Code de test 2 - MicroCoaster Premium', NOW()),
-('0123456789', 'Code de test 3 - MicroCoaster Premium', NOW()),
-('TEST123', 'Code de test 4 - MicroCoaster Premium TEST123', NOW());
-
--- Codes de test pour les codes en attente (liés mais pas activés)
-INSERT INTO warranty_premium_codes (code, product_info, user_id, is_used, linked_at, created_at) VALUES 
-('PENDING001', 'MicroCoaster Premium - Pending Test 1', '123456789012345678', TRUE, NOW(), NOW()),
-('PENDING002', 'MicroCoaster Premium - Pending Test 2', '987654321098765432', TRUE, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
-('PENDING003', 'MicroCoaster Premium - Pending Test 3', NULL, TRUE, NULL, DATE_SUB(NOW(), INTERVAL 5 DAY));
 
 -- Index pour optimiser les performances (syntaxe compatible MySQL 8.4+)
 CREATE INDEX idx_warranty_codes_user ON warranty_premium_codes(user_id);
