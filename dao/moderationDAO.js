@@ -6,6 +6,7 @@ class ModerationDAO {
   async getConnection() {
     return await getSharedConnection();
   }
+
   /**
    * Ajouter une sanction dans l'historique
    */
@@ -31,7 +32,9 @@ class ModerationDAO {
       console.error("Error adding sanction to history:", error);
       throw error;
     }
-  } /**
+  }
+
+  /**
    * Récupérer l'historique de modération d'un utilisateur
    */
   async getUserSanctionHistory(userId, limit = 10) {
@@ -52,12 +55,14 @@ class ModerationDAO {
       throw error;
     }
   }
+
   /**
    * Bannir un utilisateur
    */
-  async banUser(userId, moderatorId, reason) {
+  async banUser(userId, moderatorId, reason, expiresAt = null) {
     const db = await this.getConnection();
     try {
+      // Mettre à jour le statut dans user_status
       await db.execute(
         `INSERT INTO user_status (user_id, is_banned) 
          VALUES (?, true) 
@@ -65,6 +70,18 @@ class ModerationDAO {
         [userId],
       );
 
+      // Ajouter à la table user_bans avec date d'expiration
+      // Si pas d'expiration, on met une date très lointaine (100 ans)
+      const banExpiresAt =
+        expiresAt || new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000);
+      await db.execute(
+        `INSERT INTO user_bans (user_id, expires_at, reason) 
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE expires_at = ?, reason = ?`,
+        [userId, banExpiresAt, reason, banExpiresAt, reason],
+      );
+
+      // Logger dans moderation_logs
       await db.execute(
         `INSERT INTO moderation_logs (user_id, moderator_id, action_type, reason) 
          VALUES (?, ?, 'BAN', ?)`,
@@ -84,6 +101,7 @@ class ModerationDAO {
   async unbanUser(userId, moderatorId) {
     const db = await this.getConnection();
     try {
+      // Mettre à jour le statut dans user_status
       await db.execute(
         `INSERT INTO user_status (user_id, is_banned) 
          VALUES (?, false) 
@@ -91,6 +109,10 @@ class ModerationDAO {
         [userId],
       );
 
+      // Supprimer de la table user_bans
+      await db.execute(`DELETE FROM user_bans WHERE user_id = ?`, [userId]);
+
+      // Logger dans moderation_logs
       await db.execute(
         `INSERT INTO moderation_logs (user_id, moderator_id, action_type, reason) 
          VALUES (?, ?, 'UNBAN', 'User unbanned by moderator')`,
@@ -196,8 +218,7 @@ class ModerationDAO {
       throw error;
     }
   }
-  // ✂️ Méthode supprimée : getMostSanctionedUsers
-  // Cette méthode était utilisée pour les statistiques avancées de l'ancien système
+
   /**
    * Obtenir la liste des bans actifs
    */
@@ -213,6 +234,7 @@ class ModerationDAO {
       throw error;
     }
   }
+
   /**
    * Ajouter un utilisateur à la table des bans temporaires
    */
@@ -244,11 +266,6 @@ class ModerationDAO {
       throw error;
     }
   }
-  // ✂️ Méthodes supprimées pour le système simplifié :
-  // - addUserPoints (utilise l'ancien système de points)
-  // - logModeration (remplacé par addSanction)
-  // - logModerationAction (simplifié, plus de guild_id)
-  // - getUserModerationLogs (remplacé par getUserSanctionHistory)
 
   /**
    * Logger une action de modération simplifiée

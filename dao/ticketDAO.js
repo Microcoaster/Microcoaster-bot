@@ -1,10 +1,7 @@
 const { getSharedConnection } = require("../utils/dbInit");
 
 class TicketDAO {
-  constructor() {
-    // Plus besoin de configuration de base de données ici
-    // Tout est géré par dbInit
-  }
+  constructor() {}
 
   async getConnection() {
     try {

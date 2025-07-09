@@ -163,13 +163,13 @@ module.exports = {
           expiresAt ? expiresAt.getTime() : null,
         );
 
-        // Marquer comme banni
-        await moderationDAO.banUser(targetUser.id, moderator.id, reason);
-
-        // Ajouter à la table des bans si temporaire
-        if (expiresAt) {
-          await moderationDAO.addBan(targetUser.id, expiresAt, reason);
-        }
+        // Marquer comme banni (inclut maintenant l'ajout à user_bans)
+        await moderationDAO.banUser(
+          targetUser.id,
+          moderator.id,
+          reason,
+          expiresAt,
+        );
 
         // Récupérer l'historique pour les statistiques
         const history = await moderationDAO.getUserSanctionHistory(

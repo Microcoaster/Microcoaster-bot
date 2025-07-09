@@ -1,16 +1,11 @@
 const { getSharedConnection } = require("../utils/dbInit");
 
 class WarrantyDAO {
-  constructor() {
-    // Plus besoin de configuration de base de données ici
-    // Tout est géré par dbInit
-  }
+  constructor() {}
 
   async getConnection() {
     return await getSharedConnection();
   }
-
-  // ===== GESTION DES CODES PREMIUM/GARANTIE =====
 
   /**
    * Créer un nouveau code premium/garantie
@@ -597,7 +592,9 @@ class WarrantyDAO {
       );
       return false;
     }
-  } /**
+  }
+
+  /**
    * Logger une action de garantie
    */
   async logWarrantyAction(actionData) {
