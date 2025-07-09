@@ -5,7 +5,7 @@
  * Il sauvegarde les informations des rôles avant le départ pour une restauration future.
  */
 
-const warrantyDAO = require("../dao/warrantyDAO");
+const WarrantyDAO = require("../dao/warrantyDAO");
 
 module.exports = {
   name: "guildMemberRemove",
@@ -18,6 +18,9 @@ module.exports = {
     try {
       const user = member.user;
       const guild = member.guild;
+
+      // Créer une instance de WarrantyDAO
+      const warrantyDAO = new WarrantyDAO();
 
       // Vérifier si c'est le serveur configuré
       const ConfigManager = require("../utils/configManager");
@@ -53,14 +56,23 @@ module.exports = {
             has_warranty: hadWarranty,
             code_linked: existingWarranty.code_linked,
             warranty_expires_at: existingWarranty.warranty_expires_at,
-          }); // Logger le départ avec sauvegarde des rôles
-          await warrantyDAO.logWarrantyAction({
-            warranty_id: existingWarranty.warranty_id,
-            user_id: user.id,
-            action_type: "USER_LEFT",
-            action_details: `User left server with roles: ${[hadPremium ? "Premium" : "", hadWarranty ? "Warranty" : ""].filter(Boolean).join(", ")}`,
-            performed_by: member.client.user.id,
           });
+
+          // Logger le départ avec sauvegarde des rôles - utiliser le code_id depuis la garantie
+          try {
+            await warrantyDAO.logWarrantyAction({
+              user_id: user.id,
+              admin_id: member.client.user.id,
+              code_id: existingWarranty.warranty_id, // C'est en fait le code_id
+              action_type: "USER_LEFT",
+              action_details: `User left server with roles: ${[hadPremium ? "Premium" : "", hadWarranty ? "Warranty" : ""].filter(Boolean).join(", ")}`,
+              performed_by: member.client.user.id,
+            });
+          } catch (logError) {
+            console.log(
+              `⚠️ Impossible de logger l'action de départ pour ${user.tag}: ${logError.message}`,
+            );
+          }
 
           console.log(
             `   ↳ Rôles sauvegardés pour ${user.tag}: ${[hadPremium ? "Premium" : "", hadWarranty ? "Warranty" : ""].filter(Boolean).join(", ")}`,
