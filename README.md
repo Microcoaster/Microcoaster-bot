@@ -28,8 +28,6 @@ Le rôle de garantie survit aux départs du serveur : à chaque arrivée, le bot
 
 <img src="docs/sections/s04.png" alt="04 Installation" width="100%">
 
-<img src="docs/blocs/01.png" alt="Terminal bash : installation" width="100%">
-
 ```bash
 git clone https://github.com/Microcoaster/Microcoaster-bot.git
 cd Microcoaster-bot
@@ -38,8 +36,6 @@ cp .env.example .env
 ```
 
 **Base de données.** MySQL 8.0 ou supérieur. Créez la base et l'utilisateur, puis laissez le bot créer ses tables au premier démarrage.
-
-<img src="docs/blocs/02.png" alt="MySQL : créer la base et l'utilisateur" width="100%">
 
 ```sql
 CREATE DATABASE microcoaster_bot CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -53,8 +49,6 @@ FLUSH PRIVILEGES;
 <img src="docs/schemas/environnement.png" alt="DISCORD_TOKEN : token du bot délivré par le portail développeur Discord. CLIENT_ID : identifiant de l'application Discord. DB_NAME : nom de la base MySQL. DB_HOST et DB_PORT : adresse du serveur MySQL. DB_USER et DB_PASSWORD : identifiants de connexion à la base. Aucune de ces valeurs ne doit rejoindre le dépôt, elles vivent dans le fichier .env." width="100%">
 
 **Mise en route.**
-
-<img src="docs/blocs/03.png" alt="Terminal bash : démarrer le bot" width="100%">
 
 ```bash
 npm start          # le bot démarre et enregistre ses commandes
