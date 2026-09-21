@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/banniere.png" alt="MicroCoaster" width="100%">
+<img src="docs/banniere.png" alt="Bot Support, bot Discord du serveur MicroCoaster" width="100%">
 
 
 **Activation des garanties, billetterie client et modération pour le serveur Discord MicroCoaster™.**
