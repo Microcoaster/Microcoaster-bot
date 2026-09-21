@@ -1,44 +1,46 @@
 {
+  "name": "microcoaster-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord MicroCoaster™ : activation des garanties premium, billetterie de support et modération",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,json,md}\""
+  },
+  "keywords": [
+    "discord",
+    "discord-bot",
+    "microcoaster",
+    "warranty",
+    "ticket-system",
+    "moderation",
+    "mysql"
+  ],
+  "author": "Tristan Joncour",
+  "contributors": [
+    "CyberSpaceRS",
+    "Yamakajump"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microcoaster/Microcoaster-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microcoaster/Microcoaster-bot/issues"
+  },
+  "homepage": "https://github.com/Microcoaster/Microcoaster-bot#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.7",
     "mysql2": "^3.13.0",
     "node-cron": "^3.0.3"
-  },
-  "name": "microcoaster-bot",
-  "version": "1.0.0",
-  "description": "Bot Discord MicroCoaster™ - Gestion automatisée des garanties premium, support client et modération pour entreprise de microcoasters imprimés en 3D",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prettier": "prettier --write \"**/*.{js,json,md}\"",
-    "setup": "echo 'Créez un fichier .env avec TOKEN=votre_token et ID=votre_client_id'"
-  },
-  "keywords": [
-    "discord",
-    "bot",
-    "microcoaster",
-    "warranty",
-    "support",
-    "3d-printing",
-    "premium",
-    "customer-service"
-  ],
-  "author": "Yamakajump™",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/votre-username/discord-bot-template"
-  },
-  "bugs": {
-    "url": "https://github.com/votre-username/discord-bot-template/issues"
-  },
-  "homepage": "https://github.com/votre-username/discord-bot-template#readme",
-  "engines": {
-    "node": ">=16.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

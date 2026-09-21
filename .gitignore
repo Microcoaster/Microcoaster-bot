@@ -1,5 +1,17 @@
-# Ignorer le fichier .env
+# Secrets
 .env
+.env.local
 
-# Ignorer le dossier node_modules
+# Dépendances
 node_modules/
+
+# Journaux
+logs/
+*.log
+npm-debug.log*
+
+# Éditeurs et OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
