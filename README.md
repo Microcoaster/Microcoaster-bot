@@ -22,14 +22,7 @@ Le rôle de garantie survit aux départs du serveur : à chaque arrivée, le bot
 
 <img src="docs/sections/s03.png" alt="03 Données" width="100%">
 
-```
-commands/    Commandes slash, une par fichier
-buttons/     Gestionnaires d'interaction des boutons
-modals/      Formulaires modaux
-events/      Cycle de vie Discord : ready, arrivées, départs, messages
-dao/         Accès base : garanties, tickets, modération
-config/      IDs de rôles, salons et catégories du serveur
-```
+<img src="docs/schemas/arborescence.png" alt="Arborescence du dépôt. commands : les commandes slash, une par fichier. buttons : les gestionnaires d'interaction des boutons. modals : les formulaires modaux de saisie. events : le cycle de vie Discord, démarrage, arrivées, départs, messages. dao : l'accès à la base, une classe par domaine, avec warrantyDAO pour les codes activations et échéances, ticketDAO pour les tickets numérotation et transcriptions, moderationDAO pour les sanctions et la piste d'audit. utils : le socle, initialisation de la base, gestion de la configuration, expiration des bannissements. sql : init_tables.sql appliqué au premier démarrage. config : config.json, identifiants de rôles, salons et catégories." width="100%">
 
 <img src="docs/schemas/donnees.png" alt="warranty_premium_codes : codes de garantie, état d'activation et échéance. warranty_activation_logs : journal des activations, pour retrouver qui a validé quoi. support_tickets et ticket_counter : tickets ouverts et numérotation incrémentale. ticket_transcriptions : archives de conversation écrites à la fermeture du ticket. user_status et user_bans : état et sanctions par membre. user_roles_backup et role_restoration_logs : rôles sauvegardés et restaurations effectuées. moderation_logs : piste d'audit de toutes les actions de modération. Les tables sont créées par le bot au premier démarrage." width="100%">
 
@@ -61,14 +54,9 @@ FLUSH PRIVILEGES;
 npm start          # le bot démarre et enregistre ses commandes
 ```
 
-Puis sur le serveur Discord :
+Puis sur le serveur Discord, dans cet ordre.
 
-```
-/setup-bot         # crée rôles, catégories et salons
-/config            # renseigne les IDs dans config/config.json
-/setup-warranty    # publie le panneau d'activation
-/send-tickets      # publie le panneau de support
-```
+<img src="docs/schemas/mise-en-route.png" alt="Étape 1, /setup-bot : crée les rôles, les catégories et les salons dont le bot a besoin, à lancer en premier et une seule fois. Étape 2, /config : renseigne les identifiants ainsi créés dans config/config.json, par menus interactifs. Étape 3, /setup-warranty : publie le panneau d'activation de garantie dans le salon prévu. Étape 4, /send-tickets : publie le panneau d'ouverture de ticket, le bot est opérationnel." width="100%">
 
 <img src="docs/sections/s05.png" alt="05 Contribuer" width="100%">
 
