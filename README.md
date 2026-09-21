@@ -10,11 +10,7 @@ MicroCoaster vend des montagnes russes miniatures imprimées en 3D. Chaque produ
 
 **Les garanties, en deux temps.** Le client active son code lui-même, mais la garantie ne démarre qu'après validation humaine. Ce délai laisse le temps de vérifier une commande douteuse avant d'engager douze mois de couverture.
 
-```
-Client : /activate            code validé, activation en attente
-Admin  : /activate-warranty   garantie ouverte, rôle attribué, échéance posée
-Bot    : rappels automatiques à J-30 et J-7
-```
+<img src="docs/schemas/garantie.png" alt="Le client active : il saisit son code de garantie, le code est vérifié, l'activation passe en attente. Un admin valide : la garantie ne démarre qu'après ce contrôle humain, le temps de vérifier une commande douteuse. Le bot suit : rôle attribué, échéance posée, rappels automatiques à trente jours puis sept jours de l'échéance." width="100%">
 
 Le rôle de garantie survit aux départs du serveur : à chaque arrivée, le bot consulte `user_roles_backup` et restaure ce qui était dû. Un contrôle d'intégrité passe aussi au démarrage, pour rattraper les rôles perdus pendant une coupure.
 
@@ -22,38 +18,7 @@ Le rôle de garantie survit aux départs du serveur : à chaque arrivée, le bot
 
 <img src="docs/sections/s02.png" alt="02 Commandes" width="100%">
 
-**Garanties**
-
-| Commande | Accès | Rôle |
-|:--|:--|:--|
-| `/add-code` | Admin | Ajoute un code premium au système |
-| `/activate-warranty` | Admin | Valide une activation en attente |
-| `/list-pending-warranties` | Admin | Liste les activations à traiter |
-| `/warranty-extend` | Admin | Prolonge une garantie existante |
-| `/setup-warranty` | Admin | Publie le panneau d'activation |
-
-**Support**
-
-| Commande | Accès | Rôle |
-|:--|:--|:--|
-| `/send-tickets` | Admin | Publie le panneau d'ouverture de ticket |
-
-**Modération**
-
-| Commande | Accès | Rôle |
-|:--|:--|:--|
-| `/ban` · `/unban` | Modérateur | Bannissement et levée |
-| `/mute` | Modérateur | Réduction au silence temporaire |
-| `/warn` | Modérateur | Avertissement manuel tracé |
-
-**Administration**
-
-| Commande | Accès | Rôle |
-|:--|:--|:--|
-| `/setup-bot` | Admin | Crée rôles, salons et catégories en une fois |
-| `/config` · `/config-view` | Admin | Configuration par menus interactifs |
-| `/assign-member-role` | Admin | Attribue le rôle membre à tout le serveur |
-| `/force-restore-roles` | Admin | Force la restauration des rôles de garantie |
+<img src="docs/schemas/commandes.png" alt="Administration des garanties : /add-code ajoute un code premium, /activate-warranty valide une activation en attente et ouvre la garantie, /list-pending-warranties liste les activations à traiter, /warranty-extend prolonge une garantie existante, /setup-warranty publie le panneau d'activation. Support : /send-tickets publie le panneau d'ouverture de ticket. Modération : /ban et /unban pour le bannissement et sa levée, /mute pour la réduction au silence temporaire, /warn pour un avertissement tracé. Administration : /setup-bot crée rôles, salons et catégories, /config et /config-view pour la configuration par menus, /force-restore-roles force la restauration des rôles de garantie." width="100%">
 
 <img src="docs/sections/s03.png" alt="03 Données" width="100%">
 
@@ -66,15 +31,7 @@ dao/         Accès base : garanties, tickets, modération
 config/      IDs de rôles, salons et catégories du serveur
 ```
 
-| Table | Contenu |
-|:--|:--|
-| `warranty_premium_codes` | Codes, état d'activation, échéance |
-| `warranty_activation_logs` | Journal des activations |
-| `support_tickets` · `ticket_counter` | Tickets et numérotation |
-| `ticket_transcriptions` | Archives de conversation |
-| `user_status` · `user_bans` | État et sanctions par membre |
-| `user_roles_backup` · `role_restoration_logs` | Rôles sauvegardés et restaurations |
-| `moderation_logs` | Piste d'audit des actions de modération |
+<img src="docs/schemas/donnees.png" alt="warranty_premium_codes : codes de garantie, état d'activation et échéance. warranty_activation_logs : journal des activations, pour retrouver qui a validé quoi. support_tickets et ticket_counter : tickets ouverts et numérotation incrémentale. ticket_transcriptions : archives de conversation écrites à la fermeture du ticket. user_status et user_bans : état et sanctions par membre. user_roles_backup et role_restoration_logs : rôles sauvegardés et restaurations effectuées. moderation_logs : piste d'audit de toutes les actions de modération. Les tables sont créées par le bot au premier démarrage." width="100%">
 
 <img src="docs/sections/s04.png" alt="04 Installation" width="100%">
 
@@ -96,13 +53,7 @@ FLUSH PRIVILEGES;
 
 **Variables d'environnement.**
 
-| Variable | Rôle |
-|:--|:--|
-| `DISCORD_TOKEN` | Token du bot |
-| `CLIENT_ID` | ID de l'application Discord |
-| `DB_HOST` · `DB_PORT` | Serveur MySQL |
-| `DB_USER` · `DB_PASSWORD` | Identifiants MySQL |
-| `DB_NAME` | Nom de la base |
+<img src="docs/schemas/environnement.png" alt="DISCORD_TOKEN : token du bot délivré par le portail développeur Discord. CLIENT_ID : identifiant de l'application Discord. DB_NAME : nom de la base MySQL. DB_HOST et DB_PORT : adresse du serveur MySQL. DB_USER et DB_PASSWORD : identifiants de connexion à la base. Aucune de ces valeurs ne doit rejoindre le dépôt, elles vivent dans le fichier .env." width="100%">
 
 **Mise en route.**
 
